@@ -45,8 +45,31 @@ function HomePage() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-gray-800 text-white py-6">
-        <div className="container mx-auto px-4 text-center">
+      <footer className="bg-gray-800 text-white py-8">
+        <div className="container mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left">
+          <div>
+            <h4 className="text-lg font-semibold mb-2">Contact Us</h4>
+            <p>Dr. Mungekar's Dental Clinic</p>
+            <p>123 Smile Avenue, Mumbai, India</p>
+            <p>Phone: +91 98765 43210</p>
+            <p>Email: info@mungekarsdental.com</p>
+          </div>
+          <div>
+            <h4 className="text-lg font-semibold mb-2">Clinic Hours</h4>
+            <p>Mon - Fri: 9:00 AM - 8:00 PM</p>
+            <p>Sat: 10:00 AM - 5:00 PM</p>
+            <p>Sun: Closed</p>
+          </div>
+          <div>
+            <h4 className="text-lg font-semibold mb-2">Follow Us</h4>
+            <p>
+              <a href="#" className="hover:underline">Instagram</a> |{' '}
+              <a href="#" className="hover:underline">Facebook</a> |{' '}
+              <a href="#" className="hover:underline">Twitter</a>
+            </p>
+          </div>
+        </div>
+        <div className="container mx-auto px-4 text-center mt-8 text-sm text-gray-300">
           <p>&copy; 2025 Dr. Mungekar's Dental Clinic. All rights reserved.</p>
         </div>
       </footer>
