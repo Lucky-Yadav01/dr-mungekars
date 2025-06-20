@@ -1,0 +1,21 @@
+/* Global styles for Dr. Mungekar's Dental Clinic */
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+body {
+  font-family: 'Poppins', Arial, Helvetica, sans-serif;
+  background-color: #fffaf3;
+  color: #222;
+  margin: 0;
+  padding: 0;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Poppins', Arial, Helvetica, sans-serif;
+  font-weight: 700;
+  margin-top: 0;
+}
+
+.font-poppins {
+  font-family: 'Poppins', Arial, Helvetica, sans-serif;
+} 
