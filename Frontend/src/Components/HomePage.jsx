@@ -1,13 +1,22 @@
 import React from 'react'
+import { Link } from 'react-router-dom'
 
 function HomePage() {
   return (
     <div className="bg-gradient-to-b from-amber-50 to-white">
       {/* Header Section */}
       <header className="bg-gradient-to-r from-amber-600 to-amber-400 text-white py-6">
-        <div className="container mx-auto px-4">
-          <h1 className="text-4xl font-bold font-poppins">Dr. Mungekar's Dental Clinic</h1>
-          <p className="text-lg mt-2">Your Trusted Partner for a Healthy Smile</p>
+        <div className="container mx-auto px-4 flex justify-between items-center">
+          <div>
+            <h1 className="text-4xl font-bold font-poppins">Dr. Mungekar's Dental Clinic</h1>
+            <p className="text-lg mt-2">Your Trusted Partner for a Healthy Smile</p>
+          </div>
+          <Link
+            to="/login"
+            className="bg-white text-amber-600 px-6 py-2 rounded-lg font-semibold hover:bg-amber-50 transition"
+          >
+            Staff Login
+          </Link>
         </div>
       </header>
 
