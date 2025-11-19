@@ -322,7 +322,6 @@ export default function HomePage() {
           </div>
         </section>
 
-        // ...existing code...
         {/* ABOUT SECTION (below banner) */}
         <section id="about" className="container mx-auto px-4 py-16">
           <div className="max-w-4xl mx-auto text-center">
@@ -359,7 +358,7 @@ export default function HomePage() {
             </div>
           </div>
         </section>
-     /
+     
         {/* OUR SERVICES */}
         <section id="services" className="py-16" style={{ backgroundColor: '#f1f0eaff' }}>
           <div className="container mx-auto px-4">
