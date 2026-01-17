@@ -1,10 +1,10 @@
 import React from 'react'
 
-const Navbar = ({ pageTitle = 'Admin Console', onLogout }) => {
+const Navbar = ({ pageTitle = 'Admin Pannel', onLogout }) => {
   return (
     <header className="h-20 bg-white border-b border-gray-200 flex items-center justify-between px-8">
       <div>
-        <p className="text-xs uppercase tracking-widest text-gray-400">Admin console</p>
+        <p className="text-xs uppercase tracking-widest text-gray-400">Admin Pannel</p>
         <h1 className="text-2xl font-semibold text-gray-900">{pageTitle}</h1>
       </div>
 

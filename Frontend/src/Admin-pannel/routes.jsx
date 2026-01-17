@@ -1,5 +1,5 @@
 import React from 'react'
-import AdminPanel from './pages/AdminPanel'
+import AdminPanel from './pages/Dashboard'
 
 const PlaceholderView = ({ title, description }) => (
   <section className="p-8">
@@ -20,7 +20,7 @@ const adminRoutes = [
     path: '',
     to: '/admin',
     label: 'Dashboard',
-    pageTitle: 'Dashboard Overview',
+    pageTitle: 'Admin Dashboard',
     element: <AdminPanel />,
   },
   {
