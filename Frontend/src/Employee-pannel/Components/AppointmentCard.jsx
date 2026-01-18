@@ -19,6 +19,9 @@ const AppointmentCard = ({ appointment, onStatusChange, onEdit, onDelete, onClic
             {appointment.patientName}
           </h3>
           <p className="text-gray-600 mt-1">{appointment.doctorName}</p>
+          {appointment.appointmentNumber && (
+            <p className="text-xs text-gray-500 mt-1">#{appointment.appointmentNumber}</p>
+          )}
         </div>
         <div className="flex items-center gap-2">
           <span className={`px-3 py-1 rounded-full text-xs font-medium ${statusColors[appointment.status]}`}>

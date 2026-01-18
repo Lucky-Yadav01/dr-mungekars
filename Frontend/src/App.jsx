@@ -36,10 +36,9 @@ import './App.css'
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'
 import HomePage from './Components/HomePage'
 import LoginPage from './Components/LoginPage'
-import MainLayout from './Admin-pannel/layout/MainLayout'
-import EmployeePanel from './Employee-pannel/EmployeePanel'
-import adminRoutes from './Admin-pannel/routes'
-import HomeNavbar from './Components/HomeNavbar' // public navbar
+import HomeNavbar from './Components/HomeNavbar'
+import MainLayout from './Employee-pannel/layout/MainLayout'
+import adminRoutes from './Employee-pannel/routes'
 
 function AppContent() {
   const location = useLocation()
@@ -62,7 +61,6 @@ function AppContent() {
             )
           )}
         </Route>
-        <Route path="/employee" element={<EmployeePanel />} />
       </Routes>
     </>
   )

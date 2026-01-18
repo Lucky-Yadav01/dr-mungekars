@@ -4,6 +4,9 @@ import AppointmentCard from '../Components/AppointmentCard'
 import AppointmentModal from '../Components/AppointmentModal'
 import FilterModal from '../Components/FilterModal'
 
+// Note: In a real app, this would be handled through a global state manager or context
+// For now, we'll simulate the patient update
+
 const Appointments = () => {
   const navigate = useNavigate()
   const [appointments, setAppointments] = useState([])
@@ -39,6 +42,7 @@ const Appointments = () => {
         const mockAppointments = [
           {
             id: 1,
+            appointmentNumber: 'APT001',
             patientName: 'John Doe',
             doctorName: 'Dr. Siddhesh Mungekar',
             time: '10:00 AM',
@@ -51,6 +55,7 @@ const Appointments = () => {
           },
           {
             id: 2,
+            appointmentNumber: 'APT002',
             patientName: 'Jane Smith',
             doctorName: 'Dr. Sunita Mungekar',
             time: '11:30 AM',
@@ -63,6 +68,7 @@ const Appointments = () => {
           },
           {
             id: 3,
+            appointmentNumber: 'APT003',
             patientName: 'Mike Johnson',
             doctorName: 'Dr. Siddhesh Mungekar',
             time: '2:00 PM',
@@ -98,6 +104,7 @@ const Appointments = () => {
       // Mock implementation
       const newAppointment = {
         id: Date.now(),
+        appointmentNumber: appointmentData.appointmentNumber || `APT${String(Date.now()).slice(-6)}`,
         ...appointmentData,
         date: selectedDate
       }
@@ -128,12 +135,64 @@ const Appointments = () => {
       setAppointments(prev => prev.map(apt => 
         apt.id === appointmentId ? { ...apt, ...updates } : apt
       ))
+      
+      // If appointment is marked as completed, update patient history
+      if (updates.status === 'completed') {
+        const completedAppointment = appointments.find(apt => apt.id === appointmentId)
+        if (completedAppointment) {
+          const updatedAppointment = { ...completedAppointment, ...updates }
+          await updatePatientHistoryFromAppointment(updatedAppointment)
+        }
+      }
+      
       setSuccessMessage('Appointment updated successfully!')
       setTimeout(() => setSuccessMessage(''), 3000)
     } catch (error) {
       console.error('Error updating appointment:', error)
       setError('Failed to update appointment. Please try again.')
       throw error
+    }
+  }
+
+  // Patient History Integration
+  const updatePatientHistoryFromAppointment = async (appointmentData) => {
+    try {
+      // In a real application, this would make an API call to update patient records
+      // For now, we'll use localStorage to simulate patient updates
+      
+      const visitData = {
+        id: Date.now(),
+        date: appointmentData.date,
+        treatment: appointmentData.treatment,
+        doctor: appointmentData.doctorName,
+        appointmentId: appointmentData.id,
+        appointmentNumber: appointmentData.appointmentNumber,
+        notes: appointmentData.notes || '',
+        duration: appointmentData.duration,
+        status: 'completed',
+        timestamp: new Date().toISOString()
+      }
+      
+      // Store the visit in localStorage for demo purposes
+      const existingVisits = JSON.parse(localStorage.getItem('patientVisits') || '[]')
+      const updatedVisits = [...existingVisits, visitData]
+      localStorage.setItem('patientVisits', JSON.stringify(updatedVisits))
+      
+      // Also trigger a custom event that the Patients component could listen to
+      window.dispatchEvent(new CustomEvent('patientHistoryUpdate', {
+        detail: {
+          patientName: appointmentData.patientName,
+          phone: appointmentData.phone,
+          visitData: visitData
+        }
+      }))
+      
+      console.log('Patient history updated for:', appointmentData.patientName, visitData)
+      setSuccessMessage(`Appointment completed! Patient history updated for ${appointmentData.patientName}`)
+      
+    } catch (error) {
+      console.error('Error updating patient history:', error)
+      setError('Appointment completed but failed to update patient history')
     }
   }
 
