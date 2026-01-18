@@ -1,14 +1,10 @@
 import React from 'react'
 
-const Navbar = ({ pageTitle = 'Admin Pannel', onLogout }) => {
+const Navbar = ({ pageTitle = 'Employee Panel', onLogout }) => {
   return (
     <header className="h-20 bg-white border-b border-gray-200 flex items-center justify-between px-8">
       <div>
-<<<<<<< HEAD:Frontend/src/Admin-pannel/Components/Navbar.jsx
-        <p className="text-xs uppercase tracking-widest text-gray-400">Admin Pannel</p>
-=======
         <p className="text-xs uppercase tracking-widest text-gray-400">Employee console</p>
->>>>>>> 9040acda34ebb8139f2b37bd52c49dcd43a5a545:Frontend/src/Employee-pannel/Components/Navbar.jsx
         <h1 className="text-2xl font-semibold text-gray-900">{pageTitle}</h1>
       </div>
 
