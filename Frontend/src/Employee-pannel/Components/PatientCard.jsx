@@ -1,6 +1,44 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 
 const PatientCard = ({ patient, onClick, onEdit, onDelete }) => {
+  const [visitCount, setVisitCount] = useState(patient.totalVisits || 0)
+  const [lastVisitDate, setLastVisitDate] = useState(patient.lastVisit)
+
+  useEffect(() => {
+    // Listen for patient history updates
+    const handleHistoryUpdate = (event) => {
+      if (event.detail.patientName === patient.name || 
+          (patient.phone && event.detail.phone === patient.phone)) {
+        // Update visit count from localStorage
+        const allVisits = JSON.parse(localStorage.getItem('patientVisits') || '[]')
+        const patientVisits = allVisits.filter(visit => 
+          visit.patientName === patient.name || 
+          (patient.phone && visit.phone === patient.phone)
+        )
+        setVisitCount(patientVisits.length)
+        if (patientVisits.length > 0) {
+          setLastVisitDate(patientVisits.sort((a, b) => new Date(b.date) - new Date(a.date))[0].date)
+        }
+      }
+    }
+
+    window.addEventListener('patientHistoryUpdate', handleHistoryUpdate)
+    
+    // Load initial visit count from localStorage
+    const allVisits = JSON.parse(localStorage.getItem('patientVisits') || '[]')
+    const patientVisits = allVisits.filter(visit => 
+      visit.patientName === patient.name || 
+      (patient.phone && visit.phone === patient.phone)
+    )
+    if (patientVisits.length > 0) {
+      setVisitCount(patientVisits.length)
+      setLastVisitDate(patientVisits.sort((a, b) => new Date(b.date) - new Date(a.date))[0].date)
+    }
+
+    return () => {
+      window.removeEventListener('patientHistoryUpdate', handleHistoryUpdate)
+    }
+  }, [patient.name, patient.phone])
   const getStatusColor = (status) => {
     switch (status) {
       case 'active':
@@ -50,11 +88,13 @@ const PatientCard = ({ patient, onClick, onEdit, onDelete }) => {
         <div className="flex justify-between text-sm mb-3">
           <div>
             <p className="text-gray-600">Last Visit</p>
-            <p className="font-medium">{new Date(patient.lastVisit).toLocaleDateString()}</p>
+            <p className="font-medium">
+              {lastVisitDate ? new Date(lastVisitDate).toLocaleDateString() : 'Never'}
+            </p>
           </div>
           <div className="text-right">
             <p className="text-gray-600">Total Visits</p>
-            <p className="font-medium">{patient.totalVisits}</p>
+            <p className="font-medium">{visitCount}</p>
           </div>
         </div>
         

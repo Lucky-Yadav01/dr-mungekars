@@ -137,6 +137,79 @@ const Patients = () => {
     }
   }
 
+  // Patient History Management
+  const addPatientVisitHistory = async (patientId, visitData) => {
+    try {
+      // TODO: Replace with actual API call
+      // const response = await fetch(`/api/admin/patients/${patientId}/history`, {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify(visitData)
+      // })
+      
+      setPatients(prev => prev.map(patient => {
+        if (patient.id === patientId) {
+          const visitHistory = patient.visitHistory || []
+          const updatedHistory = [...visitHistory, visitData]
+          
+          return {
+            ...patient,
+            visitHistory: updatedHistory,
+            lastVisit: visitData.date,
+            totalVisits: updatedHistory.length,
+            treatmentHistory: [...(patient.treatmentHistory || []), {
+              id: Date.now(),
+              date: visitData.date,
+              treatment: visitData.treatment,
+              doctor: visitData.doctor,
+              notes: visitData.notes,
+              diagnosis: visitData.diagnosis || '',
+              prescription: visitData.prescription || '',
+              nextVisitDate: visitData.nextVisitDate || null
+            }]
+          }
+        }
+        return patient
+      }))
+      
+      console.log(`Patient ${patientId} history updated with visit:`, visitData)
+    } catch (error) {
+      console.error('Error adding patient visit history:', error)
+    }
+  }
+
+  // Function to be called when appointment is completed
+  const updatePatientFromCompletedAppointment = async (appointmentData) => {
+    try {
+      // Find patient by name or phone
+      const patient = patients.find(p => 
+        p.name === appointmentData.patientName || 
+        p.phone === appointmentData.phone
+      )
+      
+      if (patient) {
+        const visitData = {
+          id: Date.now(),
+          date: appointmentData.date,
+          treatment: appointmentData.treatment,
+          doctor: appointmentData.doctorName,
+          appointmentId: appointmentData.id,
+          appointmentNumber: appointmentData.appointmentNumber,
+          notes: appointmentData.notes || '',
+          duration: appointmentData.duration,
+          status: 'completed'
+        }
+        
+        await addPatientVisitHistory(patient.id, visitData)
+        setSuccessMessage(`Patient history updated for ${patient.name}`)
+      } else {
+        console.warn('Patient not found for appointment:', appointmentData.patientName)
+      }
+    } catch (error) {
+      console.error('Error updating patient from completed appointment:', error)
+    }
+  }
+
   const deletePatient = async (patientId) => {
     try {
       setError('')
@@ -160,10 +233,12 @@ const Patients = () => {
       } else {
         await createPatient(patientData)
       }
+      // Modal state is managed by the modal component itself
       setShowAddModal(false)
       setSelectedPatient(null)
     } catch (error) {
       // Error already handled in CRUD functions
+      console.error('Error saving patient:', error)
     }
   }
 

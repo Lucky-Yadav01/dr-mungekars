@@ -357,7 +357,7 @@ const Team = () => {
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{record.checkIn || '-'}</td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{record.checkOut || '-'}</td>
-                          <td className="px-6 py-4 text-sm text-gray-900">{record.notes || '-'}</td>
+                          <td className="px-6 py-4 text-sm text-gray-900">{record.remark || '-'}</td>
                         </tr>
                       ))
                     )}

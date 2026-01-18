@@ -78,7 +78,7 @@ function LoginPage() {
                 : 'text-gray-600 hover:text-amber-600'
             }`}
           >
-            Admin Login
+            Employee Login
           </button>
           <button
             type="button"
