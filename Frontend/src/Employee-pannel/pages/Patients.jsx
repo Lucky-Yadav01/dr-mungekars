@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import PatientCard from '../Components/PatientCard'
 import PatientModal from '../Components/PatientModal'
-import PatientDetailsModal from '../Components/PatientDetailsModal'
+import dataService from '../../utils/dataService'
 
 const Patients = () => {
   const navigate = useNavigate()
@@ -10,13 +10,26 @@ const Patients = () => {
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [showAddModal, setShowAddModal] = useState(false)
-  const [showDetailsModal, setShowDetailsModal] = useState(false)
   const [selectedPatient, setSelectedPatient] = useState(null)
   const [error, setError] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
 
   useEffect(() => {
     fetchPatients()
+    
+    // Listen for patient updates from appointment completions
+    const handlePatientUpdate = (event) => {
+      // Refresh patients data when appointments are completed
+      fetchPatients()
+    }
+    
+    window.addEventListener('patientHistoryUpdate', handlePatientUpdate)
+    window.addEventListener('appointmentUpdated', handlePatientUpdate)
+    
+    return () => {
+      window.removeEventListener('patientHistoryUpdate', handlePatientUpdate)
+      window.removeEventListener('appointmentUpdated', handlePatientUpdate)
+    }
   }, [])
 
   // CRUD Operations
@@ -29,56 +42,66 @@ const Patients = () => {
       // const data = await response.json()
       
       setTimeout(() => {
-        const mockPatients = [
-          {
-            id: 1,
-            name: 'John Doe',
-            email: 'john.doe@email.com',
-            phone: '+91 98765 43210',
-            age: 35,
-            gender: 'Male',
-            address: '123 Main Street, Mumbai',
-            lastVisit: '2024-01-15',
-            nextAppointment: '2024-02-15',
-            totalVisits: 12,
-            status: 'active',
-            medicalHistory: ['Hypertension', 'Dental Anxiety'],
-            emergencyContact: '+91 98765 43299'
-          },
-          {
-            id: 2,
-            name: 'Jane Smith',
-            email: 'jane.smith@email.com',
-            phone: '+91 98765 43211',
-            age: 28,
-            gender: 'Female',
-            address: '456 Oak Avenue, Mumbai',
-            lastVisit: '2024-01-10',
-            nextAppointment: '2024-02-20',
-            totalVisits: 8,
-            status: 'active',
-            medicalHistory: ['Diabetes'],
-            emergencyContact: '+91 98765 43288'
-          },
-          {
-            id: 3,
-            name: 'Mike Johnson',
-            email: 'mike.johnson@email.com',
-            phone: '+91 98765 43212',
-            age: 42,
-            gender: 'Male',
-            address: '789 Pine Street, Mumbai',
-            lastVisit: '2024-01-12',
-            nextAppointment: null,
-            totalVisits: 15,
-            status: 'active',
-            medicalHistory: [],
-            emergencyContact: '+91 98765 43277'
-          }
-        ]
-        setPatients(mockPatients)
+        // Use dataService to get patients
+        if (!dataService.isInitialized('patients')) {
+          const mockPatients = [
+            {
+              id: 1,
+              name: 'John Doe',
+              email: 'john.doe@email.com',
+              phone: '9876543210',
+              age: 35,
+              gender: 'Male',
+              address: '123 Main Street, Mumbai',
+              lastVisit: '2024-01-15',
+              nextAppointment: null,
+              totalVisits: 12,
+              status: 'active',
+              medicalHistory: ['Hypertension', 'Dental Anxiety'],
+              emergencyContact: '9876543299',
+              appointments: []
+            },
+            {
+              id: 2,
+              name: 'Jane Smith',
+              email: 'jane.smith@email.com',
+              phone: '9876543211',
+              age: 28,
+              gender: 'Female',
+              address: '456 Oak Avenue, Mumbai',
+              lastVisit: '2024-01-10',
+              nextAppointment: null,
+              totalVisits: 8,
+              status: 'active',
+              medicalHistory: ['Diabetes'],
+              emergencyContact: '9876543288',
+              appointments: []
+            },
+            {
+              id: 3,
+              name: 'Mike Johnson',
+              email: 'mike.johnson@email.com',
+              phone: '9876543212',
+              age: 42,
+              gender: 'Male',
+              address: '789 Pine Street, Mumbai',
+              lastVisit: '2024-01-12',
+              nextAppointment: null,
+              totalVisits: 15,
+              status: 'active',
+              medicalHistory: [],
+              emergencyContact: '9876543277',
+              appointments: []
+            }
+          ]
+          dataService.savePatients(mockPatients)
+          dataService.setInitialized('patients')
+        }
+        
+        const storedPatients = dataService.getPatients()
+        setPatients(storedPatients)
         setLoading(false)
-      }, 800)
+      }, 300)
     } catch (error) {
       console.error('Error fetching patients:', error)
       setError('Failed to load patients. Please try again.')
@@ -101,8 +124,14 @@ const Patients = () => {
         id: Date.now(),
         ...patientData,
         status: 'active',
-        totalVisits: 0
+        totalVisits: 0,
+        appointments: []
       }
+      
+      // Use dataService to save
+      const patients = dataService.getPatients()
+      const updatedPatients = [...patients, newPatient]
+      dataService.savePatients(updatedPatients)
       
       setPatients(prev => [...prev, newPatient])
       setSuccessMessage('Patient created successfully!')
@@ -125,6 +154,14 @@ const Patients = () => {
       //   body: JSON.stringify(updates)
       // })
       
+      // Use dataService to update
+      const patients = dataService.getPatients()
+      const updatedPatients = patients.map(patient => 
+        patient.id === patientId ? { ...patient, ...updates } : patient
+      )
+      dataService.savePatients(updatedPatients)
+      
+      // Update local state
       setPatients(prev => prev.map(patient => 
         patient.id === patientId ? { ...patient, ...updates } : patient
       ))
@@ -332,10 +369,7 @@ const Patients = () => {
             <PatientCard
               key={patient.id}
               patient={patient}
-              onClick={() => {
-                setSelectedPatient(patient)
-                setShowDetailsModal(true)
-              }}
+              onClick={() => navigate(`/admin/patients/${patient.id}`)}
               onEdit={() => {
                 setSelectedPatient(patient)
                 setShowAddModal(true)
@@ -357,22 +391,9 @@ const Patients = () => {
           onSave={handleSavePatient}
         />
       )}
-
-      {showDetailsModal && selectedPatient && (
-        <PatientDetailsModal
-          patient={selectedPatient}
-          onClose={() => {
-            setShowDetailsModal(false)
-            setSelectedPatient(null)
-          }}
-          onEdit={() => {
-            setShowDetailsModal(false)
-            setShowAddModal(true)
-          }}
-        />
-      )}
     </div>
   )
 }
+
 
 export default Patients

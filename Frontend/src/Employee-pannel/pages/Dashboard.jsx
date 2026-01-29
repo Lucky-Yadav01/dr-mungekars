@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import dataService from '../../utils/dataService'
 
 const Dashboard = () => {
   const navigate = useNavigate()
@@ -18,18 +19,23 @@ const Dashboard = () => {
   const fetchDashboardData = async () => {
     try {
       setLoading(true)
-      // Mock API call - replace with actual backend
-      setTimeout(() => {
-        setStats({
-          totalAppointments: 156,
-          todayAppointments: 8,
-          totalPatients: 342,
-          employees: 12
-        })
-        setLoading(false)
-      }, 1000)
+      // TODO: Replace with actual API call when backend is ready
+      // const response = await fetch('/api/dashboard/stats')
+      // const data = await response.json()
+      
+      // Get real statistics from current data
+      const realStats = dataService.getDashboardStats()
+      setStats(realStats)
+      setLoading(false)
     } catch (error) {
       console.error('Error fetching dashboard data:', error)
+      // Set zeros on error as requested
+      setStats({
+        totalAppointments: 0,
+        todayAppointments: 0,
+        totalPatients: 0,
+        employees: 0
+      })
       setLoading(false)
     }
   }

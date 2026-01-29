@@ -1,4 +1,5 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import dataService from '../../utils/dataService'
 
 const Modal = ({ children, onClose, title }) => {
   return (
@@ -38,6 +39,40 @@ const AppointmentModal = ({ appointment, onClose, onSave }) => {
   })
 
   const [errors, setErrors] = useState({})
+  const [matchedPatient, setMatchedPatient] = useState(null)
+  const [showPrescriptionForm, setShowPrescriptionForm] = useState(false)
+  const [prescriptions, setPrescriptions] = useState([])
+  const [newPrescription, setNewPrescription] = useState({
+    name: '',
+    dosage: '',
+    frequency: '',
+    duration: '',
+    instructions: ''
+  })
+
+  // Helper function to find existing patient by email
+  const findExistingPatient = (email) => {
+    return dataService.findPatientByEmail(email)
+  }
+
+  // Check for existing patient when email changes
+  useEffect(() => {
+    if (formData.patientEmail && formData.patientEmail.trim()) {
+      const existingPatient = findExistingPatient(formData.patientEmail)
+      setMatchedPatient(existingPatient)
+    } else {
+      setMatchedPatient(null)
+    }
+  }, [formData.patientEmail])
+
+  // Show/hide prescription form based on status
+  useEffect(() => {
+    if (formData.status === 'completed') {
+      setShowPrescriptionForm(true)
+    } else {
+      setShowPrescriptionForm(false)
+    }
+  }, [formData.status])
 
   const validateForm = () => {
     const newErrors = {}
@@ -107,7 +142,31 @@ const AppointmentModal = ({ appointment, onClose, onSave }) => {
     return Object.keys(newErrors).length === 0
   }
 
-  const handleSubmit = (e) => {
+  const handleAddPrescription = () => {
+    if (!newPrescription.name || !newPrescription.dosage || !newPrescription.frequency) {
+      alert('Please fill in medicine name, dosage, and frequency')
+      return
+    }
+
+    setPrescriptions(prev => [...prev, {
+      id: Date.now(),
+      ...newPrescription
+    }])
+    
+    setNewPrescription({
+      name: '',
+      dosage: '',
+      frequency: '',
+      duration: '',
+      instructions: ''
+    })
+  }
+
+  const handleRemovePrescription = (prescriptionId) => {
+    setPrescriptions(prev => prev.filter(p => p.id !== prescriptionId))
+  }
+
+  const handleSubmit = async (e) => {
     e.preventDefault()
     if (validateForm()) {
       // Generate appointment number
@@ -126,9 +185,64 @@ const AppointmentModal = ({ appointment, onClose, onSave }) => {
         notes: formData.notes,
         date: formData.appointmentDate,
         patientEmail: formData.patientEmail,
-        createdAt: appointment?.createdAt || new Date().toISOString()
+        createdAt: appointment?.createdAt || new Date().toISOString(),
+        // Add patient linking information
+        linkedPatientId: matchedPatient?.id || null,
+        isLinkedToExistingPatient: !!matchedPatient
       }
+      
+      // If appointment is marked as completed and we have prescriptions, save them
+      if (formData.status === 'completed' && prescriptions.length > 0 && matchedPatient) {
+        try {
+          // Save each prescription to the patient's medicine list
+          for (const prescription of prescriptions) {
+            const medicineData = {
+              id: prescription.id,
+              patientId: matchedPatient.id,
+              name: prescription.name,
+              dosage: prescription.dosage,
+              frequency: prescription.frequency,
+              duration: prescription.duration,
+              instructions: prescription.instructions,
+              prescribedBy: formData.doctor,
+              prescribedDate: new Date().toISOString(),
+              appointmentId: appointmentData.id,
+              startDate: formData.appointmentDate,
+              status: 'active'
+            }
+            
+            dataService.addPatientMedicine(medicineData)
+          }
+        } catch (error) {
+          console.error('Error saving prescriptions:', error)
+          alert('Appointment saved but there was an error saving prescriptions. Please add them manually from the patient details page.')
+        }
+      }
+      
+      // If matched with existing patient, update their appointment history
+      if (matchedPatient) {
+        dataService.updatePatientAppointments(matchedPatient.id, appointmentData)
+      }
+      
       onSave(appointmentData)
+    }
+  }
+
+  // Helper function to update patient's appointment history
+  const updatePatientAppointments = (patientId, appointmentData) => {
+    try {
+      const success = dataService.updatePatientAppointments(patientId, appointmentData)
+      if (success) {
+        // Dispatch event for UI updates
+        dataService.broadcastEvent('patientAppointmentUpdate', {
+          patientId: patientId,
+          appointmentData: appointmentData
+        })
+      }
+      return success
+    } catch (error) {
+      console.error('Error updating patient appointments:', error)
+      return false
     }
   }
 
@@ -177,11 +291,19 @@ const AppointmentModal = ({ appointment, onClose, onSave }) => {
               value={formData.patientEmail}
               onChange={(e) => setFormData({...formData, patientEmail: e.target.value.toLowerCase()})}
               className={`w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent ${
-                errors.patientEmail ? 'border-red-500' : 'border-gray-300'
+                errors.patientEmail ? 'border-red-500' : matchedPatient ? 'border-green-500' : 'border-gray-300'
               }`}
               placeholder="example@email.com"
             />
             {errors.patientEmail && <p className="text-red-500 text-xs mt-1">{errors.patientEmail}</p>}
+            {matchedPatient && (
+              <p className="text-green-600 text-xs mt-1 flex items-center gap-1">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                Patient found: {matchedPatient.name} - This appointment will be linked to their record
+              </p>
+            )}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Appointment Date *</label>
@@ -291,6 +413,136 @@ const AppointmentModal = ({ appointment, onClose, onSave }) => {
             />
           </div>
         </div>
+
+        {/* Prescription Form - Only show when appointment is being marked as completed and patient is linked */}
+        {showPrescriptionForm && matchedPatient && (
+          <div className="border-t border-gray-200 pt-6 mt-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Add Prescriptions for {matchedPatient.name}
+            </h3>
+            
+            {/* Current Prescriptions */}
+            {prescriptions.length > 0 && (
+              <div className="mb-4">
+                <h4 className="text-sm font-medium text-gray-700 mb-2">Prescriptions to add:</h4>
+                <div className="space-y-2">
+                  {prescriptions.map((prescription) => (
+                    <div key={prescription.id} className="bg-blue-50 p-3 rounded-lg flex justify-between items-center">
+                      <div className="flex-1">
+                        <div className="font-medium text-gray-900">{prescription.name}</div>
+                        <div className="text-sm text-gray-600">
+                          {prescription.dosage} • {prescription.frequency}
+                          {prescription.duration && ` • ${prescription.duration}`}
+                        </div>
+                        {prescription.instructions && (
+                          <div className="text-sm text-gray-600">{prescription.instructions}</div>
+                        )}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleRemovePrescription(prescription.id)}
+                        className="text-red-600 hover:text-red-800 p-1"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Add New Prescription Form */}
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <h4 className="text-sm font-medium text-gray-700 mb-3">Add Medicine</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Medicine Name</label>
+                  <input
+                    type="text"
+                    value={newPrescription.name}
+                    onChange={(e) => setNewPrescription({...newPrescription, name: e.target.value})}
+                    placeholder="e.g., Amoxicillin"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Dosage</label>
+                  <input
+                    type="text"
+                    value={newPrescription.dosage}
+                    onChange={(e) => setNewPrescription({...newPrescription, dosage: e.target.value})}
+                    placeholder="e.g., 500mg"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Frequency</label>
+                  <select
+                    value={newPrescription.frequency}
+                    onChange={(e) => setNewPrescription({...newPrescription, frequency: e.target.value})}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                  >
+                    <option value="">Select frequency</option>
+                    <option value="Once daily">Once daily</option>
+                    <option value="Twice daily">Twice daily</option>
+                    <option value="Three times daily">Three times daily</option>
+                    <option value="Four times daily">Four times daily</option>
+                    <option value="As needed">As needed</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Duration</label>
+                  <input
+                    type="text"
+                    value={newPrescription.duration}
+                    onChange={(e) => setNewPrescription({...newPrescription, duration: e.target.value})}
+                    placeholder="e.g., 7 days"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Instructions</label>
+                  <input
+                    type="text"
+                    value={newPrescription.instructions}
+                    onChange={(e) => setNewPrescription({...newPrescription, instructions: e.target.value})}
+                    placeholder="e.g., Take after meals"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <button
+                    type="button"
+                    onClick={handleAddPrescription}
+                    className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors"
+                  >
+                    Add Medicine
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {showPrescriptionForm && !matchedPatient && (
+          <div className="border-t border-gray-200 pt-6 mt-6">
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+              <div className="flex">
+                <svg className="w-5 h-5 text-yellow-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+                <div>
+                  <h3 className="text-sm font-medium text-yellow-800">Patient Not Found</h3>
+                  <p className="text-sm text-yellow-700 mt-1">
+                    To add prescriptions, the patient must have a valid email address that matches an existing patient record.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="flex justify-end gap-2 pt-4">
           <button

@@ -4,7 +4,7 @@ import adminRoutes from "../routes";
 import Navbar from "../Components/Navbar";
 import clinicLogo from "../../assets/dental_logo.png";
 
-const sidebarLinks = adminRoutes.filter((route) => route.label);
+const sidebarLinks = adminRoutes.filter((route) => route.label && route.showInSidebar !== false);
 
 const normalizePath = (pathname) => {
   if (pathname === "/") return pathname;

@@ -1,16 +1,54 @@
 import React, { useState, useEffect } from 'react'
+import dataService from '../../utils/dataService'
 
 const PatientCard = ({ patient, onClick, onEdit, onDelete }) => {
   const [visitCount, setVisitCount] = useState(patient.totalVisits || 0)
   const [lastVisitDate, setLastVisitDate] = useState(patient.lastVisit)
+  const [nextAppointment, setNextAppointment] = useState(null)
+  const [lastAppointment, setLastAppointment] = useState(null)
+
+  const calculateAppointmentDates = () => {
+    // Get appointments for this patient using data service
+    const patientAppointments = dataService.getAppointmentsByPatientEmail(patient.email)
+    
+    if (patientAppointments.length === 0) {
+      setNextAppointment(null)
+      setLastAppointment(null)
+      return
+    }
+    
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    
+    // Find future appointments (next appointment)
+    const futureAppointments = patientAppointments
+      .filter(apt => {
+        const aptDate = new Date(apt.date)
+        aptDate.setHours(0, 0, 0, 0)
+        return aptDate >= today
+      })
+      .sort((a, b) => new Date(a.date) - new Date(b.date))
+    
+    // Find past appointments (last appointment)
+    const pastAppointments = patientAppointments
+      .filter(apt => {
+        const aptDate = new Date(apt.date)
+        aptDate.setHours(0, 0, 0, 0)
+        return aptDate < today
+      })
+      .sort((a, b) => new Date(b.date) - new Date(a.date))
+    
+    setNextAppointment(futureAppointments.length > 0 ? futureAppointments[0] : null)
+    setLastAppointment(pastAppointments.length > 0 ? pastAppointments[0] : null)
+  }
 
   useEffect(() => {
     // Listen for patient history updates
     const handleHistoryUpdate = (event) => {
       if (event.detail.patientName === patient.name || 
           (patient.phone && event.detail.phone === patient.phone)) {
-        // Update visit count from localStorage
-        const allVisits = JSON.parse(localStorage.getItem('patientVisits') || '[]')
+        // Update visit count using data service
+        const allVisits = dataService.getPatientVisits()
         const patientVisits = allVisits.filter(visit => 
           visit.patientName === patient.name || 
           (patient.phone && visit.phone === patient.phone)
@@ -22,10 +60,19 @@ const PatientCard = ({ patient, onClick, onEdit, onDelete }) => {
       }
     }
 
+    // Listen for appointment updates
+    const handleAppointmentUpdate = (event) => {
+      // Recalculate appointments when any appointment is updated
+      calculateAppointmentDates()
+    }
+
     window.addEventListener('patientHistoryUpdate', handleHistoryUpdate)
+    window.addEventListener('patientAppointmentUpdate', handleAppointmentUpdate)
+    window.addEventListener('appointmentCreated', handleAppointmentUpdate)
+    window.addEventListener('appointmentUpdated', handleAppointmentUpdate)
     
     // Load initial visit count from localStorage
-    const allVisits = JSON.parse(localStorage.getItem('patientVisits') || '[]')
+    const allVisits = dataService.getPatientVisits()
     const patientVisits = allVisits.filter(visit => 
       visit.patientName === patient.name || 
       (patient.phone && visit.phone === patient.phone)
@@ -35,10 +82,16 @@ const PatientCard = ({ patient, onClick, onEdit, onDelete }) => {
       setLastVisitDate(patientVisits.sort((a, b) => new Date(b.date) - new Date(a.date))[0].date)
     }
 
+    // Calculate appointment dates
+    calculateAppointmentDates()
+
     return () => {
       window.removeEventListener('patientHistoryUpdate', handleHistoryUpdate)
+      window.removeEventListener('patientAppointmentUpdate', handleAppointmentUpdate)
+      window.removeEventListener('appointmentCreated', handleAppointmentUpdate)
+      window.removeEventListener('appointmentUpdated', handleAppointmentUpdate)
     }
-  }, [patient.name, patient.phone])
+  }, [patient.name, patient.phone, patient.email])
   const getStatusColor = (status) => {
     switch (status) {
       case 'active':
@@ -85,7 +138,7 @@ const PatientCard = ({ patient, onClick, onEdit, onDelete }) => {
       </div>
 
       <div className="pt-4 border-t border-gray-100">
-        <div className="flex justify-between text-sm mb-3">
+        <div className="grid grid-cols-2 gap-4 text-sm mb-3">
           <div>
             <p className="text-gray-600">Last Visit</p>
             <p className="font-medium">
@@ -98,14 +151,28 @@ const PatientCard = ({ patient, onClick, onEdit, onDelete }) => {
           </div>
         </div>
         
-        {patient.nextAppointment && (
-          <div className="mb-3">
-            <p className="text-sm text-gray-600">Next Appointment</p>
-            <p className="text-sm font-medium text-amber-600">
-              {new Date(patient.nextAppointment).toLocaleDateString()}
-            </p>
-          </div>
-        )}
+        {/* Appointment Information */}
+        <div className="grid grid-cols-2 gap-4 text-sm mb-3">
+          {lastAppointment && (
+            <div>
+              <p className="text-gray-600">Last Appointment</p>
+              <p className="font-medium text-sm">
+                {new Date(lastAppointment.date).toLocaleDateString()}
+              </p>
+              <p className="text-xs text-gray-500">{lastAppointment.treatment}</p>
+            </div>
+          )}
+          
+          {nextAppointment && (
+            <div className={lastAppointment ? 'text-right' : ''}>
+              <p className="text-gray-600">Next Appointment</p>
+              <p className="font-medium text-amber-600">
+                {new Date(nextAppointment.date).toLocaleDateString()}
+              </p>
+              <p className="text-xs text-amber-600">{nextAppointment.time}</p>
+            </div>
+          )}
+        </div>
 
         {/* Action Buttons */}
         <div className="flex gap-2 pt-2">
