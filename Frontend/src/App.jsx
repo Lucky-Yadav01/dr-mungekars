@@ -36,15 +36,9 @@ import './App.css'
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'
 import HomePage from './Components/Home/HomePage'
 import LoginPage from './Components/LoginPage'
-import MainLayout from './Admin-pannel/layout/MainLayout'
-import EmployeePanel from './Employee-pannel/EmployeePanel'
-import adminRoutes from './Admin-pannel/routes'
-import HomeNavbar from './Components/Home/HomeNavbar' // public navbar
-import Blog from './Components/Blog/blog'
-import BlogPost from './Components/Blog/BlogPost'
-import Services from './Components/Services/services'
-import AboutUS from './Components/AboutUs/AboutUs'
-import Footer from './Components/Footer'
+import HomeNavbar from './Components/HomeNavbar'
+import MainLayout from './Employee-pannel/layout/MainLayout'
+import adminRoutes from './Employee-pannel/routes'
 
 function AppContent() {
   const location = useLocation()
@@ -74,7 +68,6 @@ function AppContent() {
         
         </Route>
         <Route path="/employee" element={<EmployeePanel />} />
-        
       </Routes>
 
       {/* Footer – show only when not on admin routes */}

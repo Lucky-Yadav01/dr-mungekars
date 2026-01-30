@@ -62,40 +62,7 @@ function LoginPage() {
           </h1>
           <p className="mt-2 text-gray-600">Sign in to your account</p>
         </div>
-
-        {/* Login Type Toggle */}
-        <div className="bg-white rounded-lg shadow-md p-1 flex">
-          <button
-            type="button"
-            onClick={() => {
-              setLoginType('admin')
-              setError('')
-              setFormData({ email: '', password: '' })
-            }}
-            className={`flex-1 py-2 px-4 rounded-md text-sm font-semibold transition-all ${
-              loginType === 'admin'
-                ? 'bg-amber-500 text-white shadow-md'
-                : 'text-gray-600 hover:text-amber-600'
-            }`}
-          >
-            Admin Login
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setLoginType('employee')
-              setError('')
-              setFormData({ email: '', password: '' })
-            }}
-            className={`flex-1 py-2 px-4 rounded-md text-sm font-semibold transition-all ${
-              loginType === 'employee'
-                ? 'bg-amber-500 text-white shadow-md'
-                : 'text-gray-600 hover:text-amber-600'
-            }`}
-          >
-            Employee Login
-          </button>
-        </div>
+        
 
         {/* Login Form */}
         <form className="mt-8 space-y-6 bg-white p-8 rounded-lg shadow-md" onSubmit={handleSubmit}>
@@ -167,7 +134,7 @@ function LoginPage() {
               type="submit"
               className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-amber-500 hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 transition"
             >
-              Sign in as {loginType === 'admin' ? 'Admin' : 'Employee'}
+              Sign in as Employee
             </button>
           </div>
 
@@ -185,7 +152,7 @@ function LoginPage() {
         {/* Info Box */}
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-700">
           <p className="font-semibold mb-1">
-            {loginType === 'admin' ? 'Admin Access' : 'Employee Access'}
+            Employee Access
           </p>
           <p className="text-xs">
             {loginType === 'admin'
