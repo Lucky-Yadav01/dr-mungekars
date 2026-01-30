@@ -104,9 +104,9 @@ import AboutUS from "./Components/AboutUs/AboutUs";
 import Footer from "./Components/Footer";
 
 /* ===== ADMIN & EMPLOYEE ===== */
-import MainLayout from "./Admin-pannel/layout/MainLayout";
-import adminRoutes from "./Admin-pannel/routes";
-import EmployeePanel from "./Employee-pannel/EmployeePanel";
+import MainLayout from "./Employee-pannel/layout/MainLayout";
+import adminRoutes from "./Employee-pannel/routes";
+import EmployeePanel from "./Employee-pannel/pages/AdminPanel";
 
 function AppContent() {
   const location = useLocation();
