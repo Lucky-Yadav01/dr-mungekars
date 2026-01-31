@@ -102,6 +102,7 @@ import BlogPost from "./Components/Blog/BlogPost";
 import Services from "./Components/Services/services";
 import AboutUS from "./Components/AboutUs/AboutUs";
 import Footer from "./Components/Footer";
+import OurTechnology from "./Components/Technology/OurTechnology";
 
 /* ===== ADMIN & EMPLOYEE ===== */
 import MainLayout from "./Employee-pannel/layout/MainLayout";
@@ -125,6 +126,7 @@ function AppContent() {
         <Route path="/blog" element={<Blog />} />
         <Route path="/blog/:id" element={<BlogPost />} />
         <Route path="/services" element={<Services />} />
+        <Route path="/technology" element={<OurTechnology />} />
         <Route path="/about" element={<AboutUS />} />
         <Route path="/login" element={<LoginPage />} />
 
