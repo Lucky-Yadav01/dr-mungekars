@@ -282,7 +282,7 @@ export default function AboutHero() {
     <PageWrapper>
     <>
       {/* ================= HERO (MATCHES HOME PAGE) ================= */}
-      <section className="relative w-full h-[340px] sm:h-[420px] md:h-[520px] overflow-hidden">
+      <section className="relative w-full h-[450px] sm:h-[550px] md:h-[700px] overflow-hidden -mt-[72px] pt-[72px]">
         {/* Background image */}
         <div className="absolute inset-0">
           <img

@@ -103,6 +103,9 @@ import Services from "./Components/Services/services";
 import AboutUS from "./Components/AboutUs/AboutUs";
 import Footer from "./Components/Footer";
 import OurTechnology from "./Components/Technology/OurTechnology";
+import Team from "./Components/OurTeam/Team";
+import ContactUs from "./Components/ContactUs/ContactUs";
+import Bookonline from "./Components/BookOnline/Bookonline";
 
 /* ===== ADMIN & EMPLOYEE ===== */
 import MainLayout from "./Employee-pannel/layout/MainLayout";
@@ -128,6 +131,9 @@ function AppContent() {
         <Route path="/services" element={<Services />} />
         <Route path="/technology" element={<OurTechnology />} />
         <Route path="/about" element={<AboutUS />} />
+        <Route path="/team" element={<Team />} />
+        <Route path="/contact" element={<ContactUs />} />
+        <Route path="/book" element={<Bookonline />} />
         <Route path="/login" element={<LoginPage />} />
 
         {/* ===== ADMIN ROUTES ===== */}

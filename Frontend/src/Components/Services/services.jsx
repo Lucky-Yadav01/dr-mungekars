@@ -179,6 +179,7 @@ import {
   Search,
 } from 'lucide-react'
 import useUnsplashImages from '../../hooks/useUnsplashImages'
+import PageWrapper from '../PageWrapper'
 
 /* ---------------- DATA ---------------- */
 
@@ -223,9 +224,10 @@ export default function Services() {
   )
 
   return (
+    <PageWrapper>
     <main className="bg-[#F4F0E6]">
       {/* ================= HERO ================= */}
-      <section className="relative h-[360px] md:h-[480px] overflow-hidden">
+      <section className="relative h-[450px] sm:h-[550px] md:h-[700px] overflow-hidden -mt-[72px] pt-[72px]">
         {heroImages[0] && (
           <img
             src={heroImages[0].urls.regular}
@@ -418,5 +420,6 @@ export default function Services() {
         </div>
       </section>
     </main>
+    </PageWrapper>
   )
 }

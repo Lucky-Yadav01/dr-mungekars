@@ -689,7 +689,7 @@ export default function Blog() {
 
   return (
     <div className="min-h-screen bg-[#F4F0E6] text-[#3E3B32]">
-      <header className="px-4 py-6 sm:px-6 sm:py-8 border-b border-[#3E3B32]/10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <header className="px-4 py-6 sm:px-6 sm:py-8 border-b border-[#3E3B32]/10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between -mt-[72px] pt-[72px]">
         <div>
           <p className="uppercase tracking-[0.3em] text-xs text-[#5B8FA8] flex items-center gap-2">
             <Shield size={14} />

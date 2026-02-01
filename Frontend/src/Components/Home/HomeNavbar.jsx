@@ -350,7 +350,7 @@ export default function Navbar() {
   `relative text-sm font-medium whitespace-nowrap transition-colors duration-200 ${
       isActive
         ? "text-amber-500 after:absolute after:-bottom-2 after:left-0 after:w-full after:h-[2px] after:bg-amber-500"
-        : !isHome || scrolled
+        : scrolled || location.pathname === "/blog"
         ? "text-gray-700 hover:text-amber-500"
         : "text-white hover:text-amber-300"
     }`;
@@ -358,7 +358,7 @@ export default function Navbar() {
   return (
     <header
       className={`fixed top-0 left-0 w-full z-[9999] transition-all duration-300 ${
-        !isHome || scrolled ? "bg-white shadow-sm" : "bg-transparent"
+        scrolled || location.pathname === "/blog" ? "bg-white shadow-sm" : "bg-transparent"
       }`}
     >
       {/* MAIN BAR */}
@@ -375,7 +375,7 @@ export default function Navbar() {
               />
               <span
                 className={`text-lg font-extrabold tracking-wide ${
-                  !isHome || scrolled ? "text-amber-500" : "text-white"
+                  scrolled || location.pathname === "/blog" ? "text-amber-500" : "text-white"
                 }`}
               >
                 DR. MUNGEKAR&apos;S
@@ -399,7 +399,7 @@ export default function Navbar() {
             <a
               href="tel:1234567890"
               className={`text-sm ${
-                !isHome || scrolled ? "text-gray-600" : "text-white"
+                scrolled || location.pathname === "/blog" ? "text-gray-600" : "text-white"
               }`}
             >
               (123) 456-7890
@@ -417,7 +417,7 @@ export default function Navbar() {
           <button
             onClick={() => setOpen(!open)}
             className={`lg:hidden justify-self-end p-2 ${
-              !isHome || scrolled ? "text-gray-800" : "text-white"
+              scrolled || location.pathname === "/blog" ? "text-gray-800" : "text-white"
             }`}
             aria-label="Toggle menu"
           >
