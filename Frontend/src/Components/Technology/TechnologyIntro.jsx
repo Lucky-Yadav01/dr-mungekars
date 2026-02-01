@@ -124,7 +124,7 @@ function TechnologyIntroSection() {
         Dentistry done differently
       </p>
       <h2 className="mt-3 text-3xl md:text-4xl font-serif text-[#2E2B26]">
-        Torrance dental technology that works for you
+        Dr. Mungekar's dental technology that works for you
       </h2>
     </div>
 

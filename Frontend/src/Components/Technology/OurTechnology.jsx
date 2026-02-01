@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import useUnsplashImages from '../../hooks/useUnsplashImages'
 import PageWrapper from '../../Components/PageWrapper'
 import TechnologyIntro from './TechnologyIntro'
 
 export default function OurTechnology() {
+  const location = useLocation()
   const { images, loading } = useUnsplashImages(
     'modern dental technology dentist patient digital xray clinic',
     1
@@ -12,6 +13,11 @@ export default function OurTechnology() {
   
 
   const [heroImage, setHeroImage] = useState('')
+
+  // Scroll to top when component mounts or location changes
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [location])
 
   useEffect(() => {
     if (images && images.length > 0) {

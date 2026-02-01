@@ -663,10 +663,9 @@
 //   );
 // }
 
-// ...existing code...
 import React, { useMemo, useState } from "react";
 import { Heart, MessageCircle, Share, User, Shield } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { INITIAL_POSTS } from "./postsData";
 
 const Badge = ({ label }) => (
