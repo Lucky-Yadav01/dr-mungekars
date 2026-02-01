@@ -83,7 +83,7 @@ export default function ContactCard() {
           {/* RIGHT IMAGE */}
           <div className="relative h-[300px] sm:h-[400px] lg:h-auto">
             <img
-              src="https://images.unsplash.com/photo-1606813902917-3e7e6c2f7c0f?auto=format&fit=crop&w=1200&q=80"
+              src="https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?auto=format&fit=crop&w=1200&q=80"
               alt="Dental team"
               className="absolute inset-0 w-full h-full object-cover"
             />

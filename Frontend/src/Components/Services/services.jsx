@@ -162,7 +162,7 @@
 // }
 
 import React from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import {
   CheckCircle,
   Smile,
@@ -208,6 +208,13 @@ const equipments = [
 /* ---------------- COMPONENT ---------------- */
 
 export default function Services() {
+  const location = useLocation()
+
+  // Scroll to top when component mounts or location changes
+  React.useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [location])
+
   const { images: heroImages } = useUnsplashImages(
     'modern dental clinic treatment',
     1

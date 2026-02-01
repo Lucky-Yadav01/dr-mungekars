@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import useUnsplashImages from '../../hooks/useUnsplashImages'
 import PageWrapper from '../PageWrapper'
 
@@ -15,6 +15,13 @@ const fallbackImages = [
 ]
 
 export default function Team() {
+  const location = useLocation()
+
+  // Scroll to top when component mounts or location changes
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [location])
+
   /* ===============================
      HERO BANNER IMAGE (UNSPLASH)
   =============================== */

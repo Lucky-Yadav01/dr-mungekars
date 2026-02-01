@@ -246,19 +246,42 @@
 
 import React, { useEffect, useState } from 'react'
 
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import useUnsplashImages from '../../hooks/useUnsplashImages'
 import PageWrapper from '../PageWrapper'
+import heroVideo from '../../assets/hero section.mp4'
 
 
 
 
 export default function AboutHero() {
+  const location = useLocation()
+  const videoRef = React.useRef(null)
+
+  // Scroll to top when component mounts or location changes
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [location])
+
+  // Pause video on scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      if (videoRef.current) {
+        videoRef.current.pause()
+      }
+    }
+
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
   const { images, loading } = useUnsplashImages(
     'modern dental clinic dentist patient consultation technology',
     4
   )
+
+  // Track video playback state
+  const [isPlaying, setIsPlaying] = useState(false)
 
   // Optional slider index (if needed later)
   const [activeIndex, setActiveIndex] = useState(0)
@@ -465,24 +488,35 @@ export default function AboutHero() {
 </Link>
 
 
-        <div className="mt-8 rounded-xl overflow-hidden relative">
-          {loading ? (
-            <div className="h-[360px] bg-gray-300" />
-          ) : (
-            <img
-              src={images[3]}
-              alt="Dental technology in clinic"
-              className="w-full h-[360px] object-cover"
-            />
-          )}
+        <div className="mt-8 rounded-xl overflow-hidden relative bg-black group">
+          <video
+            ref={videoRef}
+            width="100%"
+            height="360"
+            controls
+            onPlay={() => setIsPlaying(true)}
+            onPause={() => setIsPlaying(false)}
+            className="w-full h-[360px] object-cover"
+            poster="https://images.unsplash.com/photo-1606813902917-3e7e6c2f7c0f?auto=format&fit=crop&w=1200&q=80"
+          >
+            <source src={heroVideo} type="video/mp4" />
+            <p>Your browser doesn't support HTML5 video.</p>
+          </video>
 
-          {/* Decorative play icon */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-14 h-14 rounded-full border-2 border-amber-500
-                            flex items-center justify-center bg-white/70">
-              ▶
+          {/* Play Button Overlay - Only show when paused */}
+          {!isPlaying && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/50 transition-colors pointer-events-none">
+              <div className="w-20 h-20 rounded-full bg-white/90 group-hover:bg-white transition-colors flex items-center justify-center shadow-lg">
+                <svg
+                  className="w-10 h-10 text-amber-500 ml-1"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
 

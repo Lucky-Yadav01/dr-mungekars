@@ -1,8 +1,17 @@
 import { useState } from 'react'
+import React from 'react'
+import { useLocation } from 'react-router-dom'
 import homebanner from '../../assets/homebanner1.png'
 import PageWrapper from '../PageWrapper'
 
 export default function BookOnline() {
+  const location = useLocation()
+
+  // Scroll to top when component mounts or location changes
+  React.useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [location])
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',

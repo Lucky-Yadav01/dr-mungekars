@@ -677,8 +677,12 @@ const Badge = ({ label }) => (
 
 export default function Blog() {
   const [posts, setPosts] = useState(INITIAL_POSTS);
-  const navigate = useNavigate();
+  const navigate = useNavigate();  const location = useLocation()
 
+  // Scroll to top when component mounts or location changes
+  React.useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [location])
   const handleLike = (postId) => {
     setPosts((prev) =>
       prev.map((p) => (p.id === postId ? { ...p, likes: p.likes + 1 } : p))

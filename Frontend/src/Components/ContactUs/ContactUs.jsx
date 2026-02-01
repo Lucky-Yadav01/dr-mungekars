@@ -1,8 +1,15 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import PageWrapper from '../PageWrapper'
 
 export default function ContactUs() {
+  const location = useLocation()
+
+  // Scroll to top when component mounts or location changes
+  React.useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [location])
+
   return (
     <PageWrapper>
     <main className="bg-[#F4F0E6] text-[#3E3B32]">
