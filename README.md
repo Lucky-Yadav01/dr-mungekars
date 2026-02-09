@@ -8,43 +8,43 @@ The project was built to simulate real client requirements and translate web dev
 
 **Project Objectives**
 
-Design a professional website for a dental clinic
+1. Design a professional website for a dental clinic
 
-Present dental treatments in a structured format
+2. Present dental treatments in a structured format
 
-Enable patient appointment interaction
+3. Enable patient appointment interaction
 
-Ensure accessibility across devices
+4. Ensure accessibility across devices
 
-Apply frontend development concepts in a real-world scenario
+5. Apply frontend development concepts in a real-world scenario
 
 **Concepts & Knowledge Applied**
 
-UI/UX & Frontend Development
+1. UI/UX & Frontend Development
 
-Responsive layout design (mobile-first approach)
+2. Responsive layout design (mobile-first approach)
 
-Semantic HTML for healthcare content structuring
+3. Semantic HTML for healthcare content structuring
 
-CSS Flexbox & Grid for service layouts
+4. CSS Flexbox & Grid for service layouts
 
-Visual hierarchy for medical information clarity
+5. Visual hierarchy for medical information clarity
 
-Functional Implementation
+6. Functional Implementation
 
-Appointment booking form
+7. Appointment booking form
 
-Input validation & structured data capture
+8. Input validation & structured data capture
 
-Contact interaction interface
+9. Contact interaction interface
 
-Practical Engineering Exposure
+10. Practical Engineering Exposure
 
-Project folder structuring
+11. Project folder structuring
 
-Asset and image optimization
+12. Asset and image optimization
 
-Cross-device compatibility testing
+13. Cross-device compatibility testing
 
 **Tech Stack**
 
@@ -56,17 +56,17 @@ VS Code • Git • GitHub • Chrome DevTools
 
 **Key Features**
 
-Dentist profile & clinic introduction
+1. Dentist profile & clinic introduction
 
-Dental services & treatments section
+2. Dental services & treatments section
 
-Appointment booking form
+3. Appointment booking form
 
-Clinic contact & location details
+4. Clinic contact & location details
 
-Responsive design for all screen sizes
+5. Responsive design for all screen sizes
 
-Clean, healthcare-focused interface
+6. Clean, healthcare-focused interface
 
 **Running Locally**
 
@@ -90,15 +90,15 @@ Launch App.jsx in browser
 
 Building this clinic website strengthened my ability to:
 
-Develop real client-oriented healthcare interfaces
+1. Develop real client-oriented healthcare interfaces
 
-Structure service-heavy websites clearly
+2. Structure service-heavy websites clearly
 
-Implement responsive UI systems
+3. Implement responsive UI systems
 
-Design patient-friendly interaction flows
+4. Design patient-friendly interaction flows
 
-Execute end-to-end frontend development independently
+5. Execute end-to-end frontend development independently
 
 
 
