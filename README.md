@@ -9,25 +9,41 @@ The project was built to simulate real client requirements and translate web dev
 **Project Objectives**
 
 Design a professional website for a dental clinic
+
 Present dental treatments in a structured format
+
 Enable patient appointment interaction
+
 Ensure accessibility across devices
+
 Apply frontend development concepts in a real-world scenario
 
 **Concepts & Knowledge Applied**
 
 UI/UX & Frontend Development
+
 Responsive layout design (mobile-first approach)
+
 Semantic HTML for healthcare content structuring
+
 CSS Flexbox & Grid for service layouts
+
 Visual hierarchy for medical information clarity
+
 Functional Implementation
+
 Appointment booking form
+
 Input validation & structured data capture
+
 Contact interaction interface
+
 Practical Engineering Exposure
+
 Project folder structuring
+
 Asset and image optimization
+
 Cross-device compatibility testing
 
 **Tech Stack**
@@ -41,10 +57,15 @@ VS Code • Git • GitHub • Chrome DevTools
 **Key Features**
 
 Dentist profile & clinic introduction
+
 Dental services & treatments section
+
 Appointment booking form
+
 Clinic contact & location details
+
 Responsive design for all screen sizes
+
 Clean, healthcare-focused interface
 
 **Running Locally**
@@ -68,10 +89,15 @@ Launch App.jsx in browser
 **Development Outcomes**
 
 Building this clinic website strengthened my ability to:
+
 Develop real client-oriented healthcare interfaces
+
 Structure service-heavy websites clearly
+
 Implement responsive UI systems
+
 Design patient-friendly interaction flows
+
 Execute end-to-end frontend development independently
 
 
