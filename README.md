@@ -71,7 +71,7 @@ VS Code • Git • GitHub • Chrome DevTools
 **Running Locally**
 
 Clone the repository
-git clone https://github.com/yourusername/dr-mungekars.git
+git clone https://github.com/Lucky-Yadav01/dr-mungekars.git
 Open the folder
 Launch App.jsx in browser
 (or run using Live Server)
