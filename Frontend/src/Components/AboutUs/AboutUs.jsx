@@ -322,7 +322,7 @@ export default function AboutHero() {
         <div className="absolute inset-0 bg-black/45" />
 
         {/* Content */}
-        <div className="relative z-10 h-full max-w-7xl mx-auto px-6 sm:px-8 md:px-12 flex flex-col justify-center">
+        <div className="relative z-10 h-full max-w-7xl mx-auto px-3 sm:px-4 md:px-6 flex flex-col justify-center">
           <h1 className="text-white text-3xl sm:text-4xl md:text-5xl font-extrabold max-w-2xl">
             Dr. Mungekar&apos;s Dental Clinic
           </h1>
@@ -351,7 +351,7 @@ export default function AboutHero() {
 
       {/* ================= ABOUT CONTENT ================= */}
       <section className="bg-[#F4F0E6] py-16 sm:py-20">
-        <div className="max-w-7xl mx-auto px-6 sm:px-8 md:px-12">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
             {/* Text */}
             <div>
@@ -400,7 +400,7 @@ export default function AboutHero() {
       </section>
       {/* ================= WHAT SETS US APART ================= */}
 <section className="bg-[#F4F0E6] py-20">
-  <div className="max-w-7xl mx-auto px-5 sm:px-8">
+  <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6">
     {/* Section Heading */}
     <div className="text-center mb-16">
       <p className="uppercase tracking-widest text-sm text-gray-600">
@@ -525,7 +525,7 @@ export default function AboutHero() {
 </section>
           {/* ================= DETAILS SLIDER SECTION ================= */}
 <section className="bg-white py-16">
-  <div className="max-w-7xl mx-auto px-6">
+  <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6">
     <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
 
       {/* Left Text */}
