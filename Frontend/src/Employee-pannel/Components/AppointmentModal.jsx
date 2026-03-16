@@ -97,8 +97,10 @@ const AppointmentModal = ({ appointment, onClose, onSave }) => {
       }
     }
     
-    // Email validation (optional but if provided must be valid)
-    if (formData.patientEmail && formData.patientEmail.trim()) {
+    // Email validation
+    if (!formData.patientEmail.trim()) {
+      newErrors.patientEmail = 'Email is required'
+    } else {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
       if (!emailRegex.test(formData.patientEmail.trim())) {
         newErrors.patientEmail = 'Please enter a valid email address'
@@ -285,9 +287,10 @@ const AppointmentModal = ({ appointment, onClose, onSave }) => {
             {errors.patientPhone && <p className="text-red-500 text-xs mt-1">{errors.patientPhone}</p>}
           </div>
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
             <input
               type="email"
+              required
               value={formData.patientEmail}
               onChange={(e) => setFormData({...formData, patientEmail: e.target.value.toLowerCase()})}
               className={`w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent ${

@@ -1,6 +1,68 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import dataService from '../../utils/dataService'
+import AppointmentModal from '../Components/AppointmentModal'
+
+const formatDateKey = (date) => {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+const parseDateKey = (dateKey) => {
+  const [year, month, day] = (dateKey || '').split('-').map(Number)
+  if (!year || !month || !day) return null
+  return new Date(year, month - 1, day)
+}
+
+const getDateKey = (value) => {
+  if (!value) return null
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value
+  const parsed = new Date(value)
+  if (Number.isNaN(parsed.getTime())) return null
+  return formatDateKey(parsed)
+}
+
+const getAppointmentDateTime = (appointment) => {
+  const date = parseDateKey(appointment?.date)
+  if (!date) return null
+  const [hours = 0, minutes = 0] = (appointment?.time || '00:00').split(':').map(Number)
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate(), hours, minutes)
+}
+
+const calculateAgeFromDateOfBirth = (dateOfBirth) => {
+  if (!dateOfBirth) return null
+  const birthDate = new Date(dateOfBirth)
+  if (Number.isNaN(birthDate.getTime())) return null
+
+  const today = new Date()
+  let age = today.getFullYear() - birthDate.getFullYear()
+  const monthDiff = today.getMonth() - birthDate.getMonth()
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+    age -= 1
+  }
+  return age >= 0 ? age : null
+}
+
+const getPatientRelatedAppointments = (patientData) => {
+  const allAppointments = dataService.getAppointments()
+  const email = patientData.email?.trim().toLowerCase()
+  const phone = patientData.phone?.trim()
+  const name = patientData.name?.trim().toLowerCase()
+
+  return allAppointments.filter((appointment) => {
+    const appointmentEmail = appointment.patientEmail?.trim().toLowerCase()
+    const appointmentPhone = appointment.phone?.trim()
+    const appointmentName = appointment.patientName?.trim().toLowerCase()
+    return (
+      appointment.linkedPatientId === patientData.id ||
+      (email && appointmentEmail === email) ||
+      (phone && appointmentPhone === phone) ||
+      (name && appointmentName === name)
+    )
+  })
+}
 
 const PatientDetails = () => {
   const { id } = useParams()
@@ -12,6 +74,8 @@ const PatientDetails = () => {
   const [successMessage, setSuccessMessage] = useState('')
   const [editingSection, setEditingSection] = useState(null)
   const [showMedicineForm, setShowMedicineForm] = useState(false)
+  const [showAppointmentModal, setShowAppointmentModal] = useState(false)
+  const [appointmentDraft, setAppointmentDraft] = useState(null)
   
   // Form states
   const [personalInfo, setPersonalInfo] = useState({})
@@ -19,6 +83,7 @@ const PatientDetails = () => {
   const [emergencyContact, setEmergencyContact] = useState({})
   const [insuranceInfo, setInsuranceInfo] = useState({})
   const [notes, setNotes] = useState('')
+  const [patientDocuments, setPatientDocuments] = useState([])
   const [newMedicine, setNewMedicine] = useState({
     name: '',
     dosage: '',
@@ -32,6 +97,22 @@ const PatientDetails = () => {
 
   useEffect(() => {
     fetchPatientDetails()
+  }, [id])
+
+  useEffect(() => {
+    const refreshPatientDetails = () => fetchPatientDetails()
+
+    window.addEventListener('appointmentCreated', refreshPatientDetails)
+    window.addEventListener('appointmentUpdated', refreshPatientDetails)
+    window.addEventListener('patientHistoryUpdate', refreshPatientDetails)
+    window.addEventListener('patientAppointmentUpdate', refreshPatientDetails)
+
+    return () => {
+      window.removeEventListener('appointmentCreated', refreshPatientDetails)
+      window.removeEventListener('appointmentUpdated', refreshPatientDetails)
+      window.removeEventListener('patientHistoryUpdate', refreshPatientDetails)
+      window.removeEventListener('patientAppointmentUpdate', refreshPatientDetails)
+    }
   }, [id])
 
   const fetchPatientDetails = async () => {
@@ -54,7 +135,7 @@ const PatientDetails = () => {
       }
 
       // Get patient appointments
-      const appointments = dataService.getAppointmentsByPatientEmail(patientData.email)
+      const appointments = getPatientRelatedAppointments(patientData)
       
       // Get patient medicines
       const medicines = dataService.getPatientMedicines(patientData.id)
@@ -65,19 +146,53 @@ const PatientDetails = () => {
         visit.patientName === patientData.name
       )
 
+      const allPatientDocuments = JSON.parse(localStorage.getItem('patientDocuments') || '{}')
+      const documents = allPatientDocuments[patientData.id] || []
+
       const enrichedPatient = {
         ...patientData,
         appointments: appointments.sort((a, b) => new Date(b.date) - new Date(a.date)),
         medicines: medicines || [],
-        visits: visits.sort((a, b) => new Date(b.date) - new Date(a.date))
+        visits: visits.sort((a, b) => new Date(b.date) - new Date(a.date)),
+        documents,
       }
+
+      const now = new Date()
+
+      const completedAppointmentDates = enrichedPatient.appointments
+        .filter((appointment) => {
+          const appointmentDateTime = getAppointmentDateTime(appointment)
+          return appointmentDateTime && appointmentDateTime <= now && appointment.status !== 'cancelled'
+        })
+        .map((appointment) => {
+          const dateKey = getDateKey(appointment.date)
+          if (!dateKey) return null
+          return `${dateKey}-${appointment.time || '00:00'}`
+        })
+
+      const recordedVisitDates = enrichedPatient.visits.map((visit) => {
+        const visitDateKey = getDateKey(visit.date)
+        if (!visitDateKey) return null
+        const visitTime = visit.time || '00:00'
+        return `${visitDateKey}-${visitTime}`
+      })
+
+      const unifiedVisitRecords = [...completedAppointmentDates, ...recordedVisitDates].filter(Boolean)
+      const uniqueVisitRecords = new Set(unifiedVisitRecords)
+      const visitDateKeys = [...uniqueVisitRecords].map((record) => record.split('-').slice(0, 3).join('-'))
+      const derivedLastVisit = visitDateKeys.length
+        ? visitDateKeys.sort((a, b) => parseDateKey(b) - parseDateKey(a))[0]
+        : null
+
+      enrichedPatient.totalVisits = uniqueVisitRecords.size
+      enrichedPatient.lastVisit = derivedLastVisit
 
       setPatient(enrichedPatient)
       setPersonalInfo({
         name: enrichedPatient.name,
         email: enrichedPatient.email,
         phone: enrichedPatient.phone,
-        age: enrichedPatient.age,
+        dateOfBirth: enrichedPatient.dateOfBirth || '',
         gender: enrichedPatient.gender,
         address: enrichedPatient.address
       })
@@ -93,6 +208,7 @@ const PatientDetails = () => {
         expiryDate: enrichedPatient.insuranceExpiry || ''
       })
       setNotes(enrichedPatient.notes || '')
+      setPatientDocuments(documents)
       
       setLoading(false)
     } catch (error) {
@@ -245,6 +361,135 @@ const PatientDetails = () => {
     setMedicalHistory(prev => prev.filter((_, i) => i !== index))
   }
 
+  const handleUploadDocuments = (event, category) => {
+    const files = Array.from(event.target.files || [])
+    if (files.length === 0 || !patient?.id) return
+
+    const newDocuments = files.map((file, index) => ({
+      id: Date.now() + index,
+      category,
+      name: file.name,
+      size: file.size,
+      fileType: file.type,
+      uploadedAt: new Date().toISOString(),
+    }))
+
+    const allPatientDocuments = JSON.parse(localStorage.getItem('patientDocuments') || '{}')
+    const existingDocuments = allPatientDocuments[patient.id] || []
+    const updatedDocuments = [...existingDocuments, ...newDocuments]
+
+    localStorage.setItem(
+      'patientDocuments',
+      JSON.stringify({
+        ...allPatientDocuments,
+        [patient.id]: updatedDocuments,
+      })
+    )
+
+    setPatientDocuments(updatedDocuments)
+    setSuccessMessage(`${category === 'xray' ? 'X-ray' : 'Report'} uploaded successfully!`)
+    setTimeout(() => setSuccessMessage(''), 3000)
+    event.target.value = ''
+  }
+
+  const handleRemoveDocument = (documentId) => {
+    if (!patient?.id) return
+
+    const allPatientDocuments = JSON.parse(localStorage.getItem('patientDocuments') || '{}')
+    const existingDocuments = allPatientDocuments[patient.id] || []
+    const updatedDocuments = existingDocuments.filter((doc) => doc.id !== documentId)
+
+    localStorage.setItem(
+      'patientDocuments',
+      JSON.stringify({
+        ...allPatientDocuments,
+        [patient.id]: updatedDocuments,
+      })
+    )
+
+    setPatientDocuments(updatedDocuments)
+    setSuccessMessage('Document removed successfully!')
+    setTimeout(() => setSuccessMessage(''), 3000)
+  }
+
+  const handleDeletePatient = () => {
+    if (!patient?.id) return
+    const confirmDelete = window.confirm('Are you sure you want to delete this patient? This action cannot be undone.')
+    if (!confirmDelete) return
+
+    const updatedPatients = dataService.getPatients().filter((existingPatient) => existingPatient.id !== patient.id)
+    dataService.savePatients(updatedPatients)
+
+    const existingAppointments = dataService.getAppointments()
+    const updatedAppointments = existingAppointments.filter((appointment) => {
+      const patientEmail = patient.email?.trim().toLowerCase()
+      const appointmentEmail = appointment.patientEmail?.trim().toLowerCase()
+      return appointment.linkedPatientId !== patient.id && (!patientEmail || appointmentEmail !== patientEmail)
+    })
+    dataService.saveAppointments(updatedAppointments)
+
+    const existingMedicines = dataService.getPatientMedicines()
+    const filteredMedicines = existingMedicines.filter((medicine) => medicine.patientId !== patient.id)
+    localStorage.setItem('patientMedicines', JSON.stringify(filteredMedicines))
+
+    const allPatientDocuments = JSON.parse(localStorage.getItem('patientDocuments') || '{}')
+    delete allPatientDocuments[patient.id]
+    localStorage.setItem('patientDocuments', JSON.stringify(allPatientDocuments))
+
+    navigate('/admin/patients')
+  }
+
+  const openAddAppointmentModal = () => {
+    if (!patient) return
+    const defaultDate = formatDateKey(new Date())
+    setAppointmentDraft({
+      patientName: patient.name || '',
+      patientEmail: patient.email || '',
+      phone: patient.phone || '',
+      doctorName: 'Dr. Siddhesh Mungekar',
+      treatment: 'Consultation',
+      date: defaultDate,
+      time: '10:00',
+      duration: '30 min',
+      status: 'scheduled',
+      notes: '',
+      source: 'existing-patient',
+      linkedPatientId: patient.id,
+      isLinkedToExistingPatient: true,
+    })
+    setShowAppointmentModal(true)
+  }
+
+  const handleSaveAppointment = async (appointmentData) => {
+    try {
+      const existingAppointments = dataService.getAppointments()
+      const uniqueId = Date.now() + Math.floor(Math.random() * 1000)
+
+      const newAppointment = {
+        id: uniqueId,
+        appointmentNumber: appointmentData.appointmentNumber || `APT${String(uniqueId).slice(-6)}`,
+        ...appointmentData,
+        source: 'existing-patient',
+        linkedPatientId: patient.id,
+        isLinkedToExistingPatient: true,
+        createdAt: new Date().toISOString(),
+      }
+
+      dataService.saveAppointments([...existingAppointments, newAppointment])
+      dataService.updatePatientAppointments(patient.id, newAppointment)
+      dataService.broadcastEvent('appointmentCreated', { appointment: newAppointment })
+
+      setShowAppointmentModal(false)
+      setAppointmentDraft(null)
+      await fetchPatientDetails()
+      setSuccessMessage('Appointment added successfully for this patient!')
+      setTimeout(() => setSuccessMessage(''), 3000)
+    } catch (saveError) {
+      console.error('Error creating appointment from patient details:', saveError)
+      setError('Failed to create appointment. Please try again.')
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -268,7 +513,10 @@ const PatientDetails = () => {
     )
   }
 
+  const dynamicAge = calculateAgeFromDateOfBirth(patient?.dateOfBirth)
+
   return (
+    <>
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
@@ -288,6 +536,18 @@ const PatientDetails = () => {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <button
+            onClick={openAddAppointmentModal}
+            className="px-4 py-2 text-sm rounded-lg border border-amber-500 text-amber-700 hover:bg-amber-50 transition-colors"
+          >
+            Add Appointment
+          </button>
+          <button
+            onClick={handleDeletePatient}
+            className="px-4 py-2 text-sm rounded-lg border border-red-300 text-red-700 hover:bg-red-50 transition-colors"
+          >
+            Delete Patient
+          </button>
           <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center">
             <span className="text-amber-600 font-medium text-lg">
               {patient?.name.split(' ').map(n => n[0]).join('').toUpperCase()}
@@ -357,12 +617,13 @@ const PatientDetails = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Age</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>
                   <input
-                    type="number"
-                    value={personalInfo.age}
-                    onChange={(e) => setPersonalInfo({...personalInfo, age: parseInt(e.target.value)})}
+                    type="date"
+                    value={personalInfo.dateOfBirth || ''}
+                    onChange={(e) => setPersonalInfo({...personalInfo, dateOfBirth: e.target.value})}
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                    max={formatDateKey(new Date())}
                   />
                 </div>
                 <div>
@@ -417,7 +678,11 @@ const PatientDetails = () => {
                 </div>
                 <div>
                   <span className="text-gray-600">Age:</span>
-                  <p className="font-medium">{patient?.age} years</p>
+                  <p className="font-medium">{dynamicAge !== null ? `${dynamicAge} years` : 'Not set'}</p>
+                </div>
+                <div>
+                  <span className="text-gray-600">Date of Birth:</span>
+                  <p className="font-medium">{patient?.dateOfBirth ? new Date(patient.dateOfBirth).toLocaleDateString() : 'Not set'}</p>
                 </div>
                 <div>
                   <span className="text-gray-600">Gender:</span>
@@ -879,6 +1144,62 @@ const PatientDetails = () => {
             )}
           </div>
 
+          <div className="bg-white rounded-lg shadow-sm p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">X-rays & Reports</h3>
+              <span className="text-xs text-gray-500">{patientDocuments.length} files</span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+              <label className="flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:border-amber-400 hover:bg-amber-50/50 cursor-pointer transition-colors text-sm font-medium text-gray-700">
+                Upload X-ray
+                <input
+                  type="file"
+                  accept="image/*,.dcm"
+                  multiple
+                  className="hidden"
+                  onChange={(event) => handleUploadDocuments(event, 'xray')}
+                />
+              </label>
+
+              <label className="flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:border-amber-400 hover:bg-amber-50/50 cursor-pointer transition-colors text-sm font-medium text-gray-700">
+                Upload Report
+                <input
+                  type="file"
+                  accept=".pdf,.doc,.docx,image/*"
+                  multiple
+                  className="hidden"
+                  onChange={(event) => handleUploadDocuments(event, 'report')}
+                />
+              </label>
+            </div>
+
+            {patientDocuments.length === 0 ? (
+              <p className="text-sm text-gray-500">No X-rays or reports uploaded yet.</p>
+            ) : (
+              <div className="space-y-2 max-h-56 overflow-y-auto">
+                {patientDocuments
+                  .sort((a, b) => new Date(b.uploadedAt) - new Date(a.uploadedAt))
+                  .map((document) => (
+                    <div key={document.id} className="flex items-center justify-between border border-gray-200 rounded-lg px-3 py-2">
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-gray-900 truncate">{document.name}</p>
+                        <p className="text-xs text-gray-500">
+                          {document.category === 'xray' ? 'X-ray' : 'Report'} · {(document.size / 1024).toFixed(1)} KB · {new Date(document.uploadedAt).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => handleRemoveDocument(document.id)}
+                        className="text-xs text-red-600 hover:text-red-800"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ))}
+              </div>
+            )}
+          </div>
+
         </div>
       </div>
 
@@ -941,6 +1262,18 @@ const PatientDetails = () => {
       </div>
 
     </div>
+
+    {showAppointmentModal && (
+      <AppointmentModal
+        appointment={appointmentDraft}
+        onClose={() => {
+          setShowAppointmentModal(false)
+          setAppointmentDraft(null)
+        }}
+        onSave={handleSaveAppointment}
+      />
+    )}
+    </>
   )
 }
 

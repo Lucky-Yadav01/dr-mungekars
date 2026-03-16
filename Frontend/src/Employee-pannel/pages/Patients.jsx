@@ -25,10 +25,12 @@ const Patients = () => {
     
     window.addEventListener('patientHistoryUpdate', handlePatientUpdate)
     window.addEventListener('appointmentUpdated', handlePatientUpdate)
+    window.addEventListener('appointmentCreated', handlePatientUpdate)
     
     return () => {
       window.removeEventListener('patientHistoryUpdate', handlePatientUpdate)
       window.removeEventListener('appointmentUpdated', handlePatientUpdate)
+      window.removeEventListener('appointmentCreated', handlePatientUpdate)
     }
   }, [])
 
@@ -287,7 +289,7 @@ const Patients = () => {
 
   const filteredPatients = patients.filter(patient =>
     patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    patient.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (patient.email || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
     patient.phone.includes(searchTerm)
   )
 
@@ -370,11 +372,6 @@ const Patients = () => {
               key={patient.id}
               patient={patient}
               onClick={() => navigate(`/admin/patients/${patient.id}`)}
-              onEdit={() => {
-                setSelectedPatient(patient)
-                setShowAddModal(true)
-              }}
-              onDelete={() => handleDeletePatient(patient.id)}
             />
           ))
         )}

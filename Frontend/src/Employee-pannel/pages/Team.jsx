@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import EmployeeCard from '../Components/EmployeeCard'
 import { EmployeeDetailsModal, EmployeeFormModal } from '../Components/EmployeeModal'
 import AttendanceModal from '../Components/AttendanceModal'
+import drSiddhesh from '../../assets/drsiddhesh.png'
+import drSunita from '../../assets/drsunita.png'
 
 const Team = () => {
+  const navigate = useNavigate()
   const [employees, setEmployees] = useState([])
   const [attendance, setAttendance] = useState([])
   const [loading, setLoading] = useState(true)
@@ -15,18 +19,36 @@ const Team = () => {
   const [selectedEmployeeForAttendance, setSelectedEmployeeForAttendance] = useState(null)
   const [selectedAttendanceFilter, setSelectedAttendanceFilter] = useState('')
   const [activeTab, setActiveTab] = useState('employees')
+  const [hoveredCard, setHoveredCard] = useState(null)
 
   useEffect(() => {
     fetchEmployees()
     fetchAttendance()
   }, [])
 
+  const featuredDoctors = [
+    {
+      id: 'siddhesh',
+      name: 'Dr. Siddhesh Mungekar',
+      designation: 'Senior Dentist',
+      details: 'Focused on general dentistry, root canal, and comprehensive restorative care with patient-first treatment planning.',
+      image: drSiddhesh,
+    },
+    {
+      id: 'sunita',
+      name: 'Dr. Sunita Mungekar',
+      designation: 'Senior Dentist',
+      details: 'Specializes in cosmetic dentistry and orthodontic guidance with emphasis on comfort and long-term oral health.',
+      image: drSunita,
+    },
+  ]
+
   const fetchEmployees = async () => {
     try {
       setLoading(true)
       // Mock data for now - replace with actual API call
       setTimeout(() => {
-        setEmployees([
+        const mockEmployees = [
           {
             id: 1,
             name: 'Dr. Siddhesh Mungekar',
@@ -37,7 +59,9 @@ const Team = () => {
             joinDate: '2020-01-15',
             status: 'active',
             workingHours: '9:00 AM - 6:00 PM',
-            specialization: 'General Dentistry, Root Canal'
+            specialization: 'General Dentistry, Root Canal',
+            profileImage: drSiddhesh,
+            details: 'Senior consultant for comprehensive dental treatment planning and complex restorative procedures.'
           },
           {
             id: 2,
@@ -49,45 +73,55 @@ const Team = () => {
             joinDate: '2020-01-15',
             status: 'active',
             workingHours: '9:00 AM - 6:00 PM',
-            specialization: 'Cosmetic Dentistry, Orthodontics'
+            specialization: 'Cosmetic Dentistry, Orthodontics',
+            profileImage: drSunita,
+            details: 'Leads cosmetic and alignment cases with advanced esthetic treatment workflows.'
           },
-          {
-            id: 3,
-            name: 'Priya Sharma',
-            email: 'priya.sharma@drmungekars.com',
-            phone: '+91 98765 43212',
-            role: 'Dental Hygienist',
-            department: 'Clinical',
-            joinDate: '2021-03-10',
-            status: 'active',
-            workingHours: '8:00 AM - 5:00 PM',
-            specialization: 'Teeth Cleaning, Preventive Care'
-          },
-          {
-            id: 4,
-            name: 'Rajesh Kumar',
-            email: 'rajesh.kumar@drmungekars.com',
-            phone: '+91 98765 43213',
-            role: 'Receptionist',
-            department: 'Administrative',
-            joinDate: '2022-01-20',
-            status: 'active',
-            workingHours: '9:00 AM - 6:00 PM',
-            specialization: 'Patient Management, Scheduling'
-          },
-          {
-            id: 5,
-            name: 'Lucky Yadav',
-            email: 'lucky.yadav@drmungekars.com',
-            phone: '+91 741529630',
-            role: 'Dentist',
-            department: 'Oral Surgery',
-            joinDate: '2023-01-15',
-            status: 'active',
-            workingHours: '9:00 AM - 6:00 PM',
-            specialization: 'Oral Surgery, Implants'
-          }
-        ])
+          // {
+          //   id: 3,
+          //   name: 'Priya Sharma',
+          //   email: 'priya.sharma@drmungekars.com',
+          //   phone: '+91 98765 43212',
+          //   role: 'Dental Hygienist',
+          //   department: 'Clinical',
+          //   joinDate: '2021-03-10',
+          //   status: 'active',
+          //   workingHours: '8:00 AM - 5:00 PM',
+          //   specialization: 'Teeth Cleaning, Preventive Care',
+          //   profileImage: '',
+          //   details: 'Supports preventive and hygiene-focused treatment sessions and patient education.'
+          // },
+          // {
+          //   id: 4,
+          //   name: 'Rajesh Kumar',
+          //   email: 'rajesh.kumar@drmungekars.com',
+          //   phone: '+91 98765 43213',
+          //   role: 'Receptionist',
+          //   department: 'Administrative',
+          //   joinDate: '2022-01-20',
+          //   status: 'active',
+          //   workingHours: '9:00 AM - 6:00 PM',
+          //   specialization: 'Patient Management, Scheduling',
+          //   profileImage: '',
+          //   details: 'Coordinates front desk operations, appointments, and patient communication.'
+          // },
+          // {
+          //   id: 5,
+          //   name: 'Lucky Yadav',
+          //   email: 'lucky.yadav@drmungekars.com',
+          //   phone: '+91 741529630',
+          //   role: 'Dentist',
+          //   department: 'Oral Surgery',
+          //   joinDate: '2023-01-15',
+          //   status: 'active',
+          //   workingHours: '9:00 AM - 6:00 PM',
+          //   specialization: 'Oral Surgery, Implants',
+          //   profileImage: '',
+          //   details: 'Manages oral surgery support and implant care workflows.'
+          // }
+        ]
+        setEmployees(mockEmployees)
+        localStorage.setItem('teamMembers', JSON.stringify(mockEmployees))
         setLoading(false)
       }, 800)
     } catch (error) {
@@ -152,17 +186,21 @@ const Team = () => {
       workingHours: '9:00 AM - 6:00 PM',
       specialization: employeeData.specialization || `${employeeData.role} Services`
     }
-    setEmployees([...employees, newEmployee])
+    const updatedEmployees = [...employees, newEmployee]
+    setEmployees(updatedEmployees)
+    localStorage.setItem('teamMembers', JSON.stringify(updatedEmployees))
     setShowFormModal(false)
   }
 
   const handleUpdateEmployee = (employeeData) => {
     // Mock implementation - replace with actual API call
-    setEmployees(employees.map(emp => 
-      emp.id === selectedEmployee.id 
+    const updatedEmployees = employees.map(emp =>
+      emp.id === selectedEmployee.id
         ? { ...emp, ...employeeData }
         : emp
-    ))
+    )
+    setEmployees(updatedEmployees)
+    localStorage.setItem('teamMembers', JSON.stringify(updatedEmployees))
     setShowFormModal(false)
     setSelectedEmployee(null)
   }
@@ -181,14 +219,14 @@ const Team = () => {
   )
 
   // Filter attendance based on selected employee
-  const filteredAttendance = selectedAttendanceFilter 
+  const filteredAttendance = selectedAttendanceFilter
     ? attendance.filter(record => record.employeeId === parseInt(selectedAttendanceFilter))
     : attendance
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Team Management</h1>
           <p className="text-gray-600">Manage staff and employee records</p>
@@ -204,26 +242,80 @@ const Team = () => {
         </button>
       </div>
 
+      <div className="p-6">
+        <div className="mb-4 text-center">
+          <h1 className="text-lg font-semibold text-gray-900">
+            Lead Dentists
+          </h1>
+        </div>
+        <div className="max-w-[1150px] mx-auto px-4 sm:px-6 py-2">
+          <div className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-20">
+            {featuredDoctors.map((doctor) => (
+              <div
+                key={doctor.id}
+                className="relative w-[270px] h-[340px] cursor-pointer"
+                style={{ perspective: '1200px' }}
+                onMouseEnter={() => setHoveredCard(doctor.id)}
+                onMouseLeave={() => setHoveredCard(null)}
+              >
+                <div
+                  className="relative h-full w-full transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]"
+                  style={{
+                    transformStyle: 'preserve-3d',
+                    transform: hoveredCard === doctor.id ? 'rotateY(180deg)' : 'rotateY(0deg)',
+                  }}
+                >
+                  <div
+                    className="absolute inset-0 rounded-xl border border-gray-200 shadow-sm bg-white overflow-hidden"
+                    style={{ backfaceVisibility: 'hidden' }}
+                  >
+                    <div className="h-[200px] w-full overflow-hidden border-b border-gray-100 bg-white">
+                      <img src={doctor.image} alt={doctor.name} className="w-full h-full object-cover" />
+                    </div>
+                    <div className="p-4">
+                      <p className="text-xs font-medium text-amber-700 uppercase tracking-wide text-center">Lead Dentist</p>
+                      <h3 className="mt-1 text-lg font-semibold text-gray-900">{doctor.name}</h3>
+                      <p className="mt-1 text-sm text-gray-600">{doctor.designation}</p>
+                    </div>
+                  </div>
+
+                  <div
+                    className="absolute inset-0 rounded-xl border border-amber-200 shadow-sm bg-amber-50 p-4"
+                    style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
+                  >
+                    <p className="text-xs font-medium text-amber-700 uppercase tracking-wide text-center">Lead Dentist</p>
+                    <h3 className="mt-1 text-lg font-semibold text-amber-800">{doctor.name}</h3>
+                    <p className="mt-1 text-sm text-amber-700">{doctor.designation}</p>
+                    <p className="mt-4 text-sm text-gray-700 leading-relaxed">{doctor.details}</p>
+                    <div className="mt-4 pt-3 border-t border-amber-200">
+                      <p className="text-xs text-amber-800"></p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
       {/* Tabs */}
       <div className="border-b border-gray-200">
         <nav className="-mb-px flex space-x-8">
           <button
             onClick={() => setActiveTab('employees')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${
-              activeTab === 'employees'
+            className={`py-2 px-1 border-b-2 font-medium text-sm ${activeTab === 'employees'
                 ? 'border-amber-500 text-amber-600'
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            }`}
+              }`}
           >
             Employees
           </button>
           <button
             onClick={() => setActiveTab('attendance')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${
-              activeTab === 'attendance'
+            className={`py-2 px-1 border-b-2 font-medium text-sm ${activeTab === 'attendance'
                 ? 'border-amber-500 text-amber-600'
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            }`}
+              }`}
           >
             Attendance
           </button>
@@ -266,6 +358,7 @@ const Team = () => {
                     setSelectedEmployee(employee)
                     setShowDetailsModal(true)
                   }}
+                  onViewProfile={() => navigate(`/admin/team/${employee.id}`)}
                 />
               ))
             )}
@@ -278,7 +371,7 @@ const Team = () => {
           {/* Attendance Controls */}
           <div className="bg-white rounded-lg shadow-sm p-4">
             <div className="flex items-center gap-4">
-              <select 
+              <select
                 value={selectedAttendanceFilter}
                 onChange={(e) => setSelectedAttendanceFilter(e.target.value)}
                 className="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent"
@@ -349,9 +442,8 @@ const Team = () => {
                         <tr key={record.id}>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{record.date}</td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                              record.status === 'present' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                            }`}>
+                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${record.status === 'present' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                              }`}>
                               {record.status}
                             </span>
                           </td>

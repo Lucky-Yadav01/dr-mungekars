@@ -4,8 +4,8 @@ import Appointments from './pages/Appointments'
 import Patients from './pages/Patients'
 import PatientDetails from './pages/PatientDetails'
 import Team from './pages/Team'
+import EmployeeDetails from './pages/EmployeeDetails'
 import Reports from './pages/Reports'
-import Settings from './pages/Settings'
 
 const adminRoutes = [
   {
@@ -51,20 +51,21 @@ const adminRoutes = [
     element: <Team />,
   },
   {
+    key: 'employee-details',
+    path: 'team/:id',
+    to: '/admin/team/:id',
+    label: 'Employee Details',
+    pageTitle: 'Employee Details',
+    element: <EmployeeDetails />,
+    showInSidebar: false,
+  },
+  {
     key: 'reports',
     path: 'reports',
     to: '/admin/reports',
     label: 'Reports',
     pageTitle: 'Reports & Analytics',
     element: <Reports />,
-  },
-  {
-    key: 'settings',
-    path: 'settings',
-    to: '/admin/settings',
-    label: 'Settings',
-    pageTitle: 'Clinic Settings',
-    element: <Settings />,
   },
 ]
 

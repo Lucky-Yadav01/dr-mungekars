@@ -1,6 +1,6 @@
 import React from 'react'
 
-const EmployeeCard = ({ employee, onClick }) => {
+const EmployeeCard = ({ employee, onClick, onViewProfile }) => {
   const getStatusColor = (status) => {
     switch (status) {
       case 'active':
@@ -21,11 +21,19 @@ const EmployeeCard = ({ employee, onClick }) => {
     >
       <div className="flex justify-between items-start mb-4">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center">
-            <span className="text-amber-600 font-medium text-lg">
-              {employee.name.split(' ').map(n => n[0]).join('').toUpperCase()}
-            </span>
-          </div>
+          {employee.profileImage ? (
+            <img
+              src={employee.profileImage}
+              alt={employee.name}
+              className="w-12 h-12 rounded-full object-cover border-2 border-amber-100"
+            />
+          ) : (
+            <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center">
+              <span className="text-amber-600 font-medium text-lg">
+                {employee.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+              </span>
+            </div>
+          )}
           <div>
             <h3 className="font-semibold text-gray-900">{employee.name}</h3>
             <p className="text-sm text-gray-600">{employee.role}</p>
@@ -67,6 +75,19 @@ const EmployeeCard = ({ employee, onClick }) => {
           <p className="font-medium">{new Date(employee.joinDate).toLocaleDateString()}</p>
         </div>
       </div>
+
+      {onViewProfile && (
+        <button
+          type="button"
+          onClick={(event) => {
+            event.stopPropagation()
+            onViewProfile()
+          }}
+          className="mt-4 w-full px-3 py-2 rounded-lg border border-amber-200 text-amber-700 text-sm font-medium hover:bg-amber-50 transition-colors"
+        >
+          View Detail Page
+        </button>
+      )}
     </div>
   )
 }

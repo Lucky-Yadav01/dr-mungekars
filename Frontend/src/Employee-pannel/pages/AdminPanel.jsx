@@ -96,20 +96,20 @@ function AdminPanel() {
           </div>
           <div className="bg-white p-6 rounded-lg shadow-md">
             <h3 className="text-xl font-semibold text-amber-600 font-poppins mb-3">
-              Settings
+              Today&apos;s Patients
             </h3>
-            <p className="text-gray-600 mb-4">Configure clinic settings and preferences</p>
+            <p className="text-gray-600 mb-4">Review today&apos;s patient queue and statuses</p>
             <button className="bg-amber-500 text-white px-4 py-2 rounded-lg hover:bg-amber-600 transition">
-              Open Settings
+              View Queue
             </button>
           </div>
           <div className="bg-white p-6 rounded-lg shadow-md">
             <h3 className="text-xl font-semibold text-amber-600 font-poppins mb-3">
-              Schedule Management
+              Monthly Overview
             </h3>
-            <p className="text-gray-600 mb-4">Manage clinic hours and availability</p>
+            <p className="text-gray-600 mb-4">Track monthly appointments and patient growth</p>
             <button className="bg-amber-500 text-white px-4 py-2 rounded-lg hover:bg-amber-600 transition">
-              Manage Schedule
+              View Insights
             </button>
           </div>
         </div>

@@ -32,18 +32,14 @@ const ReportCard = ({ title, value, change, changeType, period }) => {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm font-medium text-gray-600">{title}</p>
-          <p className="text-2xl font-bold text-gray-900">{value}</p>
-        </div>
-      </div>
-      <div className={`flex items-center mt-4 ${getChangeColor()}`}>
+    <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+      <p className="text-sm font-medium text-gray-600">{title}</p>
+      <p className="text-3xl font-bold text-gray-900 mt-2">{value}</p>
+      <div className={`inline-flex items-center mt-4 ${getChangeColor()} bg-gray-50 rounded-full px-2.5 py-1`}>
         {getChangeIcon()}
-        <span className="text-sm ml-1">{change}</span>
+        <span className="text-xs ml-1.5 font-medium">{change}</span>
       </div>
-      <p className="text-xs text-gray-500 mt-1">{period}</p>
+      <p className="text-xs text-gray-500 mt-2">{period}</p>
     </div>
   )
 }

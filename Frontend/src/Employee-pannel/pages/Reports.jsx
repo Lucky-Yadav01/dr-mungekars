@@ -8,11 +8,14 @@ const Reports = () => {
     totalAppointments: 0,
     newPatients: 0,
     patientSatisfaction: 0,
-    monthlyData: []
+    monthlyData: [],
+    sourceStats: {
+      website: 0,
+      admin: 0,
+    },
   })
   const [loading, setLoading] = useState(true)
   const [selectedPeriod, setSelectedPeriod] = useState('month')
-  const [selectedReport, setSelectedReport] = useState('appointments')
 
   useEffect(() => {
     fetchReports()
@@ -44,9 +47,18 @@ const Reports = () => {
       
       // Get real statistics from current data
       const reports = dataService.getReportsStats()
+      const patients = JSON.parse(localStorage.getItem('patients') || '[]')
+      const websitePatients = patients.filter((patient) => (patient.source || '').toLowerCase() === 'website').length
+      const adminPatients = patients.length - websitePatients
       console.log('Reports data:', reports)
       
-      setReportsData(reports)
+      setReportsData({
+        ...reports,
+        sourceStats: {
+          website: websitePatients,
+          admin: adminPatients,
+        },
+      })
       setLoading(false)
       console.log('Reports loaded successfully')
     } catch (error) {
@@ -56,7 +68,11 @@ const Reports = () => {
         totalAppointments: 0,
         newPatients: 0,
         patientSatisfaction: 0,
-        monthlyData: []
+        monthlyData: [],
+        sourceStats: {
+          website: 0,
+          admin: 0,
+        },
       })
       setLoading(false)
     }
@@ -72,7 +88,7 @@ const Reports = () => {
       ) : (
         <>
           {/* Header */}
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-3">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Reports & Analytics</h1>
               <p className="text-gray-600">Monitor clinic performance and trends</p>
@@ -95,11 +111,11 @@ const Reports = () => {
           </div>
 
       {/* Summary Cards - Medical Focus Only */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <ReportCard
           title="Total Appointments"
           value={(reportsData.totalAppointments || 0).toString()}
-          change="+0%"
+          change={`${reportsData.monthlyData?.length ? reportsData.monthlyData[reportsData.monthlyData.length - 1]?.growth || '+0%' : '+0%'}`}
           changeType="neutral"
           period="Overall"
         />
@@ -119,50 +135,35 @@ const Reports = () => {
         />
       </div>
 
-      {/* Report Type Tabs - Medical Focus */}
-      {/* <div className="border-b border-gray-200">
-        <nav className="-mb-px flex space-x-8">
-          <button
-            onClick={() => setSelectedReport('appointments')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${
-              selectedReport === 'appointments'
-                ? 'border-amber-500 text-amber-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            }`}
-          >
-            Appointment Trends
-          </button>
-          <button
-            onClick={() => setSelectedReport('patients')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${
-              selectedReport === 'patients'
-                ? 'border-amber-500 text-amber-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            }`}
-          >
-            Patient Analysis
-          </button>
-        </nav>
-      </div> */}
-
-      {/* Charts Section */}
-      {/* <div className="bg-white rounded-lg shadow-sm p-6">
-        {loading ? (
-          <div className="text-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-500 mx-auto"></div>
-            <p className="mt-2 text-gray-600">Loading reports...</p>
-          </div>
-        ) : (
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+        <div className="xl:col-span-2 bg-white rounded-xl shadow-sm border border-gray-200 p-5">
           <ReportsChart
             data={reportsData.monthlyData || []}
-            type={selectedReport}
+            sourceStats={reportsData.sourceStats}
             period={selectedPeriod}
           />
-        )}
-      </div> */}
+        </div>
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+          <h3 className="text-sm font-semibold text-gray-800 mb-3">Source Summary</h3>
+          <div className="space-y-3 text-sm">
+            <div className="flex items-center justify-between px-3 py-2 rounded-lg border border-gray-200">
+              <span className="text-gray-600">Website Patients</span>
+              <span className="font-semibold text-gray-900">{reportsData.sourceStats?.website || 0}</span>
+            </div>
+            <div className="flex items-center justify-between px-3 py-2 rounded-lg border border-gray-200">
+              <span className="text-gray-600">Admin Added</span>
+              <span className="font-semibold text-gray-900">{reportsData.sourceStats?.admin || 0}</span>
+            </div>
+            <div className="flex items-center justify-between px-3 py-2 rounded-lg border border-gray-200 bg-amber-50">
+              <span className="text-gray-700">Total Patients</span>
+              <span className="font-bold text-amber-700">{(reportsData.sourceStats?.website || 0) + (reportsData.sourceStats?.admin || 0)}</span>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Detailed Reports Table */}
-      <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-200">
           <h3 className="text-lg font-medium text-gray-900">Detailed Reports</h3>
         </div>
